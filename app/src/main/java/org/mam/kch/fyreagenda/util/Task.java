@@ -23,23 +23,34 @@ public class Task {
      */
     public static final Map<String, TaskItem> ITEM_MAP = new HashMap<String, TaskItem>();
 
-    private static final int COUNT = 4;
+    private static int COUNT = 0;
 
     static {
         // Add some sample items.
-        for (int i = 1; i <= COUNT; i++) {
-            addItem(createTaskItem(i));
+        for (int i = 1; i <= 5; i++) {
+            addItem(createTaskItem());
         }
     }
 
-    private static void addItem(TaskItem item) {
+    public static void addItem(TaskItem item) {
         ITEMS.add(item);
         ITEM_MAP.put(item.id, item);
     }
 
-    private static TaskItem createTaskItem(int position) {
-        return new TaskItem(String.valueOf(position), "Item " + position, makeDetails(position),
-                TaskItem.TaskType.THISWEEK);
+    public static TaskItem createTaskItem() {
+        Task.COUNT++;
+        return new TaskItem(String.valueOf(Task.COUNT), "Item " + Task.COUNT,
+                makeDetails(Task.COUNT), TaskItem.TaskType.THISWEEK);
+    }
+
+    public static TaskItem createTaskItem(String name) {
+        Task.COUNT++;
+        if(name.equals("")){
+            return new TaskItem(String.valueOf(Task.COUNT), "Item " + Task.COUNT,
+                    makeDetails(Task.COUNT), TaskItem.TaskType.THISWEEK);
+        }
+        return new TaskItem(String.valueOf(Task.COUNT), name,
+                "No details set.", TaskItem.TaskType.THISWEEK);
     }
 
     private static String makeDetails(int position) {
