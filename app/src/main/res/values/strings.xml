@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">FyreAgenda</string>
     <string name="title_task_detail">Task Detail</string>
+    <string name="section_format">Hello World from section: %1$d</string>
 </resources>
