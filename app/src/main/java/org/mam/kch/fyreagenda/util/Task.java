@@ -16,7 +16,10 @@ public class Task {
     /**
      * An array of sample (dummy) items.
      */
-    public static final List<TaskItem> ITEMS = new ArrayList<TaskItem>();
+    public static final List<TaskItem> THISWEEK = new ArrayList<TaskItem>();
+    public static final List<TaskItem> NEXTWEEK = new ArrayList<TaskItem>();
+    public static final List<TaskItem> THISMONTH = new ArrayList<TaskItem>();
+    public static final List<TaskItem> ARCHIVE = new ArrayList<TaskItem>();
 
     /**
      * A map of sample (dummy) items, by ID.
@@ -33,8 +36,15 @@ public class Task {
     }
 
     public static void addItem(TaskItem item) {
-        ITEMS.add(item);
         ITEM_MAP.put(item.id, item);
+        if(item.getTaskType()==1)
+            THISWEEK.add(item);
+        if(item.getTaskType()==2)
+            NEXTWEEK.add(item);
+        if(item.getTaskType()==3)
+            THISMONTH.add(item);
+        if(item.getTaskType()==4)
+            ARCHIVE.add(item);
     }
 
     public static TaskItem createTaskItem() {
@@ -67,13 +77,18 @@ public class Task {
      */
     public static class TaskItem {
 
-        public enum TaskType {THISWEEK, NEXTWEEK, THISMOTH, ARCHIVED }
+        public enum TaskType {THISWEEK(1), NEXTWEEK(2), THISMOTH(3), ARCHIVED(4);
+            private int value;
+            private TaskType(int value){
+                this.value = value;
+            }
+        }
         public final String id;
         public String name;
         public String details;
         public long creationTime;
         public long completionTime;
-        public TaskType taskType;
+        TaskType taskType;
         public boolean taskComplete;
 
         public TaskItem(String id, String name, String details, TaskType taskType) {
@@ -84,6 +99,7 @@ public class Task {
             this.creationTime = System.currentTimeMillis();
             this.taskComplete = false;
         }
+        public int getTaskType(){return this.taskType.value;}
 
         @Override
         public String toString() {

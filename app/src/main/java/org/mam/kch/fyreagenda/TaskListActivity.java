@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
@@ -108,7 +107,7 @@ public class TaskListActivity extends AppCompatActivity {
         View recyclerView = findViewById(R.id.task_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
-        recyclerAdapter = new SimpleItemRecyclerViewAdapter(Task.ITEMS);
+        recyclerAdapter = new SimpleItemRecyclerViewAdapter(Task.THISWEEK);
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -128,7 +127,7 @@ public class TaskListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(Task.ITEMS));
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(Task.THISWEEK));
     }
 
     public class SimpleItemRecyclerViewAdapter
