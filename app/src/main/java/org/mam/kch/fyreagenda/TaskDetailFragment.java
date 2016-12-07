@@ -45,12 +45,10 @@ public class TaskDetailFragment extends Fragment {
             // arguments. In a real-world scenario, use a Loader
             // to load name from a name provider.
             mItem = Task.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
-            mItem.setDetails("new details");
-            Task.saveItem(mItem);
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.name);
+                appBarLayout.setTitle(mItem.getName());
             }
         }
     }
@@ -62,7 +60,11 @@ public class TaskDetailFragment extends Fragment {
 
         // Show the dummy name as text in a TextView.
         if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.task_detail)).setText(mItem.details);
+            //on viewing the detail page of a task, sets and saves details below.
+            //mItem.setDetails("new details");
+            //mItem.setTaskType(Task.TaskType.ARCHIVED);
+            //Task.saveItem(mItem);
+            ((TextView) rootView.findViewById(R.id.task_detail)).setText(mItem.getDetails());
         }
 
         return rootView;
