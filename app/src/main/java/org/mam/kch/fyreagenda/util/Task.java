@@ -164,6 +164,9 @@ public class Task {
         public TaskType getTaskType(){
             return this.taskType;}
 
+        public void setName(String name) {
+            this.name = name;
+        }
         public void setDetails(String details){
             this.edited = true;
             this.details = details;}

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -23,6 +24,8 @@ public class TaskEditFragment extends Fragment {
      * represents.
      */
     public static final String ARG_ITEM_ID = "item_id";
+    Spinner spinner;
+    EditText nameInput, detailsInput;
 
     /**
      * The dummy name this fragment is presenting.
@@ -59,7 +62,9 @@ public class TaskEditFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.task_edit, container, false);
-        final Spinner spinner = (Spinner) rootView.findViewById(R.id.task_type_input);
+        nameInput = (EditText) rootView.findViewById(R.id.name_input);
+        detailsInput = (EditText) rootView.findViewById(R.id.details_input);
+        spinner = (Spinner) rootView.findViewById(R.id.task_type_input);
         final String[] selections = {"This week", "Next week", "This month"};
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<String>(rootView.getContext(), android.R.layout.simple_spinner_item,
@@ -71,8 +76,19 @@ public class TaskEditFragment extends Fragment {
         // Show the dummy name as text in a TextView.
         if (mItem != null) {
             ((TextView) rootView.findViewById(R.id.edit_detail)).setText("Edit stuff here");
+            nameInput.setText(mItem.getName());
+            detailsInput.setText(mItem.getDetails());
         }
 
         return rootView;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        // Save the new data
+        mItem.setName(nameInput.getText().toString());
+        mItem.setDetails(detailsInput.getText().toString());
+        Task.saveItem(mItem);
     }
 }
