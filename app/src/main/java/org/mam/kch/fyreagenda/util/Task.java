@@ -6,7 +6,6 @@ import android.os.Parcelable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,18 +66,35 @@ public class Task {
 
     public static void addItem(TaskItem item) {
         ITEM_MAP.put(item.id, item);
-        if(item.getTaskType()==1)
+        if(item.getTaskType()==TaskType.THISWEEK)
             THISWEEK.add(item);
-        if(item.getTaskType()==2)
+        if(item.getTaskType()==TaskType.NEXTWEEK)
             NEXTWEEK.add(item);
-        if(item.getTaskType()==3)
+        if(item.getTaskType()==TaskType.THISMONTH)
             THISMONTH.add(item);
-        if(item.getTaskType()==4)
+        if(item.getTaskType()==TaskType.ARCHIVED)
             ARCHIVE.add(item);
     }
 
+
+    private static void removeItem(TaskItem item){
+        THISWEEK.remove(item);
+        NEXTWEEK.remove(item);
+        THISMONTH.remove(item);
+        ARCHIVE.remove(item);
+    }
+
     public static void saveItem(TaskItem item){
-        ITEM_MAP.put(item.id,item);
+        if(item.isNewTaskType()){
+            removeItem(ITEM_MAP.get(item.id));
+            item.saved();
+            if(item.getTaskType() == TaskType.ARCHIVED)
+                item.setTaskComplete();
+            addItem(item);}
+        else if(item.isEdited()){
+            item.saved();
+            ITEM_MAP.put(item.id, item);
+        }
     }
 
 
@@ -113,12 +129,14 @@ public class Task {
     public static class TaskItem implements Serializable, Parcelable{
 
         public final String id;
-        public String name;
-        public String details;
-        public long creationTime;
-        public long completionTime;
-        TaskType taskType;
-        public boolean taskComplete;
+        private String name;
+        private String details;
+        private long creationTime;
+        private long completionTime;
+        private TaskType taskType;
+        private boolean taskComplete;
+        private boolean edited;
+        private boolean newTaskType;
 
         public TaskItem(String id, String name, String details, TaskType taskType) {
             this.id = id;
@@ -128,15 +146,52 @@ public class Task {
             this.creationTime = System.currentTimeMillis();
             this.completionTime = 0;
             this.taskComplete = false;
+            this.edited = false;
+            this.newTaskType = false;
         }
 
-
-        public int getTaskType(){return this.taskType.value;}
-
+        public String getName(){
+            return this.name;}
+        public String getDetails(){
+            return this.details;}
+        public int getTaskTypeValue(){
+            return this.taskType.value;}
+        public TaskType getTaskType(){
+            return this.taskType;}
 
         public void setDetails(String details){
-            this.details = details;
-        }
+            this.edited = true;
+            this.details = details;}
+
+        public void setTaskType(TaskType taskType){
+            this.edited = true;
+            if(this.taskType != taskType)
+                this.newTaskType = true;
+            this.taskType = taskType;}
+
+        public void setTaskComplete(){
+            this.edited = true;
+            this.completionTime = System.currentTimeMillis();
+            this.taskComplete = true;}
+
+        public boolean getTaskComplete(){
+            return this.taskComplete;}
+
+        public long getCompletionTime(){
+            return this.completionTime;}
+
+        public long getCreationTime(){
+            return this.creationTime;}
+
+        public boolean isEdited(){
+            return this.edited;}
+
+        public boolean isNewTaskType(){
+            return this.newTaskType;}
+
+        public void saved(){
+            this.newTaskType = false;
+            this.edited = false;}
 
         @Override
         public String toString() {
