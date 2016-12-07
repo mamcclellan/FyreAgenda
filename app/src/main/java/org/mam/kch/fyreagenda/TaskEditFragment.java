@@ -7,6 +7,8 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.mam.kch.fyreagenda.util.Task;
@@ -56,11 +58,19 @@ public class TaskEditFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.task_detail, container, false);
+        View rootView = inflater.inflate(R.layout.task_edit, container, false);
+        final Spinner spinner = (Spinner) rootView.findViewById(R.id.task_type_input);
+        final String[] selections = {"This week", "Next week", "This month"};
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<String>(rootView.getContext(), android.R.layout.simple_spinner_item,
+                        selections);
+        adapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
 
         // Show the dummy name as text in a TextView.
         if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.task_detail)).setText("Edit stuff here");
+            ((TextView) rootView.findViewById(R.id.edit_detail)).setText("Edit stuff here");
         }
 
         return rootView;

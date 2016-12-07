@@ -1,15 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:stretchColumns="1"
+    android:padding="16dp">
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/task_detail"
+        android:id="@+id/edit_detail"
         style="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:padding="16dp"
         android:textIsSelectable="true"
         tools:context="org.mam.kch.fyreagenda.TaskEditFragment" />
 
-</LinearLayout>
+    <TableRow>
+        <TextView
+            style="?android:attr/textAppearanceMedium"
+            android:text="Name: "
+            android:labelFor="@+id/name_input"/>
+        <EditText
+            android:id="@+id/name_input"
+            android:layout_column="1"
+            android:inputType="text"
+            android:maxLength="20"/>
+    </TableRow>
+    <TableRow>
+        <TextView
+            style="?android:attr/textAppearanceMedium"
+            android:text="Details: "
+            android:labelFor="@+id/details_input"/>
+        <EditText
+            android:id="@+id/details_input"
+            android:layout_column="1"
+            android:inputType="textImeMultiLine"
+            android:maxLength="200"/>
+    </TableRow>
+    <TableRow>
+        <TextView
+            style="?android:attr/textAppearanceMedium"
+            android:text="Dubai: "
+            android:labelFor="@+id/task_type_input"/>
+        <Spinner
+            android:id="@+id/task_type_input">
+
+        </Spinner>
+    </TableRow>
+
+</TableLayout>
