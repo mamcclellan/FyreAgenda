@@ -17,6 +17,13 @@ import java.util.Map;
  */
 public class Task {
 
+    public enum TaskType {THISWEEK(1), NEXTWEEK(2), THISMONTH(3), ARCHIVED(4);
+        private int value;
+        TaskType(int value){
+            this.value = value;
+        }
+    }
+
     /**
      * An array of sample (dummy) items.
      */
@@ -41,19 +48,19 @@ public class Task {
         for (int i = 1; i <= 5; i++) {
             Task.COUNT++;
             TaskItem item = new TaskItem(String.valueOf(Task.COUNT), "Next Week " + Task.COUNT,
-                    makeDetails(Task.COUNT), TaskItem.TaskType.NEXTWEEK);
+                    makeDetails(Task.COUNT), TaskType.NEXTWEEK);
             addItem(item);
         }
         for (int i = 1; i <= 5; i++) {
             Task.COUNT++;
             TaskItem item = new TaskItem(String.valueOf(Task.COUNT), "This month " + Task.COUNT,
-                    makeDetails(Task.COUNT), TaskItem.TaskType.THISMONTH);
+                    makeDetails(Task.COUNT), TaskType.THISMONTH);
             addItem(item);
         }
         for (int i = 1; i <= 5; i++) {
             Task.COUNT++;
             TaskItem item = new TaskItem(String.valueOf(Task.COUNT), "ARCHIVE " + Task.COUNT,
-                    makeDetails(Task.COUNT), TaskItem.TaskType.ARCHIVED);
+                    makeDetails(Task.COUNT), TaskType.ARCHIVED);
             addItem(item);
         }
     }
@@ -73,25 +80,24 @@ public class Task {
     public static TaskItem createTaskItem() {
         Task.COUNT++;
         return new TaskItem(String.valueOf(Task.COUNT), "Item " + Task.COUNT,
-                makeDetails(Task.COUNT), TaskItem.TaskType.THISWEEK);
+                makeDetails(Task.COUNT), TaskType.THISWEEK);
     }
 
     public static TaskItem createTaskItem(String name) {
         Task.COUNT++;
         if(name.equals("")){
             return new TaskItem(String.valueOf(Task.COUNT), "Item " + Task.COUNT,
-                    makeDetails(Task.COUNT), TaskItem.TaskType.THISWEEK);
+                    makeDetails(Task.COUNT), TaskType.THISWEEK);
         }
         return new TaskItem(String.valueOf(Task.COUNT), name,
-                "No details set.", TaskItem.TaskType.THISWEEK);
+                "No details set.", TaskType.THISWEEK);
     }
 
     private static String makeDetails(int position) {
         StringBuilder builder = new StringBuilder();
         builder.append("Details about Item: ").append(position);
-        for (int i = 0; i < position; i++) {
-            builder.append("\nMore details information here.");
-        }
+        builder.append("\nMore details information here.");
+
         return builder.toString();
     }
 
@@ -100,12 +106,6 @@ public class Task {
      */
     public static class TaskItem implements Serializable, Parcelable{
 
-        public enum TaskType {THISWEEK(1), NEXTWEEK(2), THISMONTH(3), ARCHIVED(4);
-            private int value;
-            TaskType(int value){
-                this.value = value;
-            }
-        }
         public final String id;
         public String name;
         public String details;

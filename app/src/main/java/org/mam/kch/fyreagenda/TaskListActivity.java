@@ -145,7 +145,7 @@ public class TaskListActivity extends AppCompatActivity {
                     return TaskListFragment.newInstance(Task.NEXTWEEK);
                 case 2:
                     return TaskListFragment.newInstance(Task.THISMONTH);
-                case 4:
+                case 3:
                     return TaskListFragment.newInstance(Task.ARCHIVE);
             }
 
