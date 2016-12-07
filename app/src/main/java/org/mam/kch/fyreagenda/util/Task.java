@@ -16,10 +16,15 @@ import java.util.Map;
  */
 public class Task {
 
-    public enum TaskType {THISWEEK(1), NEXTWEEK(2), THISMONTH(3), ARCHIVED(4);
+    public enum TaskType {THISWEEK(1, "This Week"), NEXTWEEK(2, "Next Week"), THISMONTH(3, "This Month"), ARCHIVED(4, "Archived");
         private int value;
-        TaskType(int value){
+        private String name;
+        TaskType(int value, String name){
             this.value = value;
+            this.name = name;
+        }
+        public String getName(){
+            return this.name;
         }
     }
 

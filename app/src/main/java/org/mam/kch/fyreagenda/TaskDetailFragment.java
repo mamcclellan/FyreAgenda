@@ -8,7 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+import java.util.Date;
 import org.mam.kch.fyreagenda.util.Task;
 
 /**
@@ -64,7 +64,15 @@ public class TaskDetailFragment extends Fragment {
             //mItem.setDetails("new details");
             //mItem.setTaskType(Task.TaskType.ARCHIVED);
             //Task.saveItem(mItem);
-            ((TextView) rootView.findViewById(R.id.task_detail)).setText(mItem.getDetails());
+            ((TextView) rootView.findViewById(R.id.task_details)).setText(mItem.getDetails());
+            ((TextView) rootView.findViewById(R.id.task_TaskType)).setText("Current list: " + mItem.getTaskType().getName());
+            ((TextView) rootView.findViewById(R.id.task_CreationTime)).setText("Creation time: " + new Date(mItem.getCreationTime()).toString());
+            if(mItem.getTaskType() == Task.TaskType.ARCHIVED)
+                ((TextView) rootView.findViewById(R.id.task_CompletionTime)).setText("Completion time: " + new Date(mItem.getCreationTime()).toString());
+            else
+                ((TextView) rootView.findViewById(R.id.task_CompletionTime)).setText("Completion time: Not Complete");
+
+
         }
 
         return rootView;
