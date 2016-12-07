@@ -45,7 +45,8 @@ public class TaskDetailFragment extends Fragment {
             // arguments. In a real-world scenario, use a Loader
             // to load name from a name provider.
             mItem = Task.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
-
+            mItem.setDetails("new details");
+            Task.saveItem(mItem);
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {

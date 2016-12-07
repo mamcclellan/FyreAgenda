@@ -77,6 +77,12 @@ public class Task {
             ARCHIVE.add(item);
     }
 
+    public static void saveItem(TaskItem item){
+        ITEM_MAP.put(item.id,item);
+    }
+
+
+
     public static TaskItem createTaskItem() {
         Task.COUNT++;
         return new TaskItem(String.valueOf(Task.COUNT), "Item " + Task.COUNT,
@@ -126,6 +132,11 @@ public class Task {
 
 
         public int getTaskType(){return this.taskType.value;}
+
+
+        public void setDetails(String details){
+            this.details = details;
+        }
 
         @Override
         public String toString() {
