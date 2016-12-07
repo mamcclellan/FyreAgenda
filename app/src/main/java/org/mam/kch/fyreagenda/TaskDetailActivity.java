@@ -3,7 +3,6 @@ package org.mam.kch.fyreagenda;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
@@ -18,9 +17,13 @@ import android.view.MenuItem;
  */
 public class TaskDetailActivity extends AppCompatActivity {
 
+    private boolean editMode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        editMode = false;
         setContentView(R.layout.activity_task_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
@@ -55,19 +58,37 @@ public class TaskDetailActivity extends AppCompatActivity {
                     .commit();
         }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Bundle arguments = new Bundle();
-                        arguments.putString(TaskDetailFragment.ARG_ITEM_ID,
-                                getIntent().getStringExtra(TaskDetailFragment.ARG_ITEM_ID));
-                        TaskEditFragment fragment = new TaskEditFragment();
-                        fragment.setArguments(arguments);
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.task_detail_container, fragment)
-                        .commit();
+                        if (editMode) {
+                            Bundle arguments = new Bundle();
+                            arguments.putString(TaskDetailFragment.ARG_ITEM_ID,
+                                    getIntent().getStringExtra(TaskDetailFragment.ARG_ITEM_ID));
+                            TaskDetailFragment fragment = new TaskDetailFragment();
+                            fragment.setArguments(arguments);
+                            getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.task_detail_container, fragment)
+                                    .commit();
+                            fab.setImageDrawable(getDrawable(R.drawable.ic_create_black));
+
+                            editMode = false;
+                        }
+                        else {
+                            Bundle arguments = new Bundle();
+                            arguments.putString(TaskDetailFragment.ARG_ITEM_ID,
+                                    getIntent().getStringExtra(TaskDetailFragment.ARG_ITEM_ID));
+                            TaskEditFragment fragment = new TaskEditFragment();
+                            fragment.setArguments(arguments);
+                            getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.task_detail_container, fragment)
+                                    .commit();
+                            fab.setImageDrawable(getDrawable(R.drawable.ic_check_black));
+
+                            editMode = true;
+                        }
 
                     }
                 }
