@@ -2,6 +2,7 @@ package org.mam.kch.fyreagenda;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -23,6 +24,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_task_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
+
 
 
         // Show the Up button in the action bar.
@@ -52,6 +54,24 @@ public class TaskDetailActivity extends AppCompatActivity {
                     .add(R.id.task_detail_container, fragment)
                     .commit();
         }
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Bundle arguments = new Bundle();
+                        arguments.putString(TaskDetailFragment.ARG_ITEM_ID,
+                                getIntent().getStringExtra(TaskDetailFragment.ARG_ITEM_ID));
+                        TaskEditFragment fragment = new TaskEditFragment();
+                        fragment.setArguments(arguments);
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.task_detail_container, fragment)
+                        .commit();
+
+                    }
+                }
+        );
     }
 
     @Override
