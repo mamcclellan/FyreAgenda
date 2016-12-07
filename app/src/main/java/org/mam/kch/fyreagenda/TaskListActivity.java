@@ -46,6 +46,7 @@ public class TaskListActivity extends AppCompatActivity {
      * device.
      */
     private static boolean mTwoPane;
+    ViewPager viewPager;
     final Context context = this;
     private String result;
 
@@ -59,7 +60,7 @@ public class TaskListActivity extends AppCompatActivity {
         toolbar.setTitle(getTitle());
 
         // Get the ViewPager and set it's PagerAdapter so that it can display items
-        final ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        viewPager = (ViewPager) findViewById(R.id.viewpager);
         final PagerAdapter pagerAdapter =
                 new PagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
@@ -120,6 +121,12 @@ public class TaskListActivity extends AppCompatActivity {
             // activity should be in two-pane mode.
             mTwoPane = true;
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        viewPager.getAdapter().notifyDataSetChanged();
     }
 
     public static boolean isTwoPane() {

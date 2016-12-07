@@ -43,7 +43,8 @@
             android:text="Dubai: "
             android:labelFor="@+id/task_type_input"/>
         <Spinner
-            android:id="@+id/task_type_input">
+            android:id="@+id/task_type_input"
+            android:layout_column="1">
 
         </Spinner>
     </TableRow>
