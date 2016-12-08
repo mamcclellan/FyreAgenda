@@ -30,7 +30,7 @@ public class TaskEditFragment extends Fragment {
     /**
      * The dummy name this fragment is presenting.
      */
-    private Task.TaskItem mItem;
+    private static Task.TaskItem mItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -85,6 +85,13 @@ public class TaskEditFragment extends Fragment {
         return rootView;
     }
 
+    public void saveData(){
+        mItem.setName(nameInput.getText().toString());
+        mItem.setDetails(detailsInput.getText().toString());
+        mItem.setTaskType(spinner.getSelectedItemPosition());
+        Task.saveItem(mItem);
+
+    }
     @Override
     public void onDetach() {
         super.onDetach();
