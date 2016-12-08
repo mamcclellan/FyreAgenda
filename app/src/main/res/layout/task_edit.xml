@@ -34,7 +34,9 @@
         <EditText
             android:id="@+id/details_input"
             android:layout_column="1"
-            android:inputType="textImeMultiLine"
+            android:inputType="textMultiLine"
+            android:scrollHorizontally="false"
+            android:layout_width="0dp"
             android:maxLength="200"/>
     </TableRow>
     <TableRow>
