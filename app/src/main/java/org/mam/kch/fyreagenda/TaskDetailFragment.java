@@ -48,8 +48,7 @@ public class TaskDetailFragment extends Fragment {
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.getName());
-            }
+                appBarLayout.setTitle(mItem.getName());}
         }
     }
 
@@ -60,10 +59,10 @@ public class TaskDetailFragment extends Fragment {
 
         // Show the dummy name as text in a TextView.
         if (mItem != null) {
-            //on viewing the detail page of a task, sets and saves details below.
-            //mItem.setDetails("new details");
-            //mItem.setTaskType(Task.TaskType.ARCHIVED);
-            //Task.saveItem(mItem);
+            Activity activity = this.getActivity();
+            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+            if (appBarLayout != null) {
+                appBarLayout.setTitle(mItem.getName());}
             ((TextView) rootView.findViewById(R.id.task_details)).setText(mItem.getDetails());
             ((TextView) rootView.findViewById(R.id.task_TaskType)).setText("Current list: " + mItem.getTaskType().getName());
             ((TextView) rootView.findViewById(R.id.task_CreationTime)).setText("Creation time: " + new Date(mItem.getCreationTime()).toString());
