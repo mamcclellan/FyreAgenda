@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class Task {
 
-    public enum TaskType {THISWEEK(1, "This Week"), NEXTWEEK(2, "Next Week"), THISMONTH(3, "This Month"), ARCHIVED(4, "Archived");
+    public enum TaskType {THISWEEK(0, "This Week"), NEXTWEEK(1, "Next Week"), THISMONTH(2, "This Month"), ARCHIVED(3, "Archived");
         private int value;
         private String name;
         TaskType(int value, String name){
@@ -175,6 +175,18 @@ public class Task {
             this.edited = true;
             if(this.taskType != taskType)
                 this.newTaskType = true;
+            this.taskType = taskType;}
+        public void setTaskType(int i){
+            this.edited = true;
+            if(this.taskType.value != i){
+                this.newTaskType = true;
+                if(i == 0)
+                    this.taskType = TaskType.THISWEEK;
+                if(i == 1)
+                    this.taskType = TaskType.NEXTWEEK;
+                if(i == 2)
+                    this.taskType = TaskType.THISMONTH;
+            }
             this.taskType = taskType;}
 
         public void setTaskComplete(){

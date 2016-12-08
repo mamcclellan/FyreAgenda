@@ -48,7 +48,7 @@ public class TaskEditFragment extends Fragment {
             // arguments. In a real-world scenario, use a Loader
             // to load name from a name provider.
             mItem = Task.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
-            mItem.setDetails("new details");
+            //mItem.setDetails("new details");
             Task.saveItem(mItem);
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
@@ -72,10 +72,12 @@ public class TaskEditFragment extends Fragment {
         adapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+        if(mItem.getTaskTypeValue()<3)
+            spinner.setSelection(mItem.getTaskTypeValue());
 
         // Show the dummy name as text in a TextView.
         if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.edit_detail)).setText("Edit stuff here");
+            ((TextView) rootView.findViewById(R.id.edit_detail)).setText(mItem.getDetails());
             nameInput.setText(mItem.getName());
             detailsInput.setText(mItem.getDetails());
         }
@@ -89,6 +91,7 @@ public class TaskEditFragment extends Fragment {
         // Save the new data
         mItem.setName(nameInput.getText().toString());
         mItem.setDetails(detailsInput.getText().toString());
+        mItem.setTaskType(spinner.getSelectedItemPosition());
         Task.saveItem(mItem);
     }
 }
