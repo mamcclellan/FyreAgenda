@@ -2,6 +2,7 @@ package org.mam.kch.fyreagenda;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -24,23 +25,24 @@ public class TaskListFragment extends Fragment {
 
     }
 
-    public void updateList() {
+    public void updateList(AppCompatActivity mainActivity) {
         Bundle args = getArguments();
         ArrayList<Task.TaskItem> newList
                 = (ArrayList<Task.TaskItem>) args.getSerializable(ARG_SECTION_NUMBER);
-        adapter = new RecyclerAdapter(newList);
+        adapter = new RecyclerAdapter(newList, mainActivity);
     }
 
     /**
      * Returns a new instance of this fragment for the given section
      * number.
      */
-    public static TaskListFragment newInstance(ArrayList<Task.TaskItem> taskList) {
+    public static TaskListFragment newInstance(ArrayList<Task.TaskItem> taskList,
+                                               AppCompatActivity mainActivity) {
         TaskListFragment fragment = new TaskListFragment();
         Bundle args = new Bundle();
         args.putSerializable(ARG_SECTION_NUMBER, taskList);
         fragment.setArguments(args);
-        fragment.updateList();
+        fragment.updateList(mainActivity);
         return fragment;
     }
 

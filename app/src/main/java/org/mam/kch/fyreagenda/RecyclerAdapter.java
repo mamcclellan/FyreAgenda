@@ -3,11 +3,17 @@ package org.mam.kch.fyreagenda;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.mam.kch.fyreagenda.util.Task;
 
@@ -17,9 +23,13 @@ public class RecyclerAdapter
         extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
 
     private final List<Task.TaskItem> mValues;
+    private Task.TaskItem selectedItem;
+    ActionMode mActionMode;
+    AppCompatActivity mainActivity;
 
-    public RecyclerAdapter(List<Task.TaskItem> items) {
+    public RecyclerAdapter(List<Task.TaskItem> items, AppCompatActivity mainActivity) {
         mValues = items;
+        this.mainActivity = mainActivity;
     }
 
     @Override
@@ -31,6 +41,7 @@ public class RecyclerAdapter
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
+        final int pos = position;
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(mValues.get(position).id);
         holder.mContentView.setText(mValues.get(position).getName());
@@ -56,6 +67,22 @@ public class RecyclerAdapter
                 }
             }
         });
+
+        holder.mView.setOnLongClickListener(
+                new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        //mainActivity.registerForContextMenu(v);
+                        if (mActionMode != null) {
+                            return false;
+                        }
+                        mActionMode = mainActivity.startActionMode(mActionModeCallback);
+                        selectedItem = mValues.get(pos);
+                        v.setSelected(true);
+                        return true;
+                    }
+                }
+        );
     }
 
     @Override
@@ -81,4 +108,45 @@ public class RecyclerAdapter
             return super.toString() + " '" + mContentView.getText() + "'";
         }
     }
+
+    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+        // Called when the action mode is created; startActionMode() was called
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // Inflate a menu resource providing context menu items
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.list_context_menu, menu);
+            return true;
+        }
+
+        // Called each time the action mode is shown. Always called after onCreateActionMode, but
+        // may be called multiple times if the mode is invalidated.
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false; // Return false if nothing is done
+        }
+
+        // Called when the user selects a contextual menu item
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.delete:
+                    Task.removeItem(selectedItem);
+                    mValues.remove(selectedItem);
+                    ((TaskListActivity) mainActivity).refreshRecycleView();
+                    selectedItem = null;
+                    mode.finish(); // Action picked, so close the CAB
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // Called when the user exits the action mode
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mActionMode = null;
+        }
+    };
 }

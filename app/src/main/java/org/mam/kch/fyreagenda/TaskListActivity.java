@@ -133,6 +133,10 @@ public class TaskListActivity extends AppCompatActivity {
         return mTwoPane;
     }
 
+    public void refreshRecycleView() {
+        viewPager.getAdapter().notifyDataSetChanged();
+    }
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -147,16 +151,16 @@ public class TaskListActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return TaskListFragment.newInstance(Task.THISWEEK);
+                    return TaskListFragment.newInstance(Task.THISWEEK, TaskListActivity.this);
                 case 1:
-                    return TaskListFragment.newInstance(Task.NEXTWEEK);
+                    return TaskListFragment.newInstance(Task.NEXTWEEK, TaskListActivity.this);
                 case 2:
-                    return TaskListFragment.newInstance(Task.THISMONTH);
+                    return TaskListFragment.newInstance(Task.THISMONTH, TaskListActivity.this);
                 case 3:
-                    return TaskListFragment.newInstance(Task.ARCHIVE);
+                    return TaskListFragment.newInstance(Task.ARCHIVE, TaskListActivity.this);
             }
 
-            return TaskListFragment.newInstance(Task.ARCHIVE);
+            return TaskListFragment.newInstance(Task.ARCHIVE, TaskListActivity.this);
         }
 
         // This override is needed to update multiple views at a time
