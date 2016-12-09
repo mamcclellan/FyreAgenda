@@ -274,7 +274,7 @@ public class Task {
             return 0;
         }
 
-        public TaskItem(Parcel source) {
+        private TaskItem(Parcel source) {
             this.id = source.readString();
             this.name = source.readString();
             this.details = source.readString();

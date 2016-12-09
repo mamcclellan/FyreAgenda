@@ -47,6 +47,7 @@ public class TaskListActivity extends AppCompatActivity {
      */
     private static boolean mTwoPane;
     ViewPager viewPager;
+    private static int currentTab;
     final Context context = this;
     private String result;
 
@@ -64,6 +65,7 @@ public class TaskListActivity extends AppCompatActivity {
         final PagerAdapter pagerAdapter =
                 new PagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
+        viewPager.setCurrentItem(currentTab);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -137,9 +139,18 @@ public class TaskListActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        // Set correct tab on ViewPager
+        viewPager.setCurrentItem(currentTab);
         viewPager.getAdapter().notifyDataSetChanged();
+        super.onStart();
+    }
+
+    @Override
+    public void onPause() {
+        // Save the current tab's position
+        currentTab = viewPager.getCurrentItem();
+        super.onPause();
     }
 
     public static boolean isTwoPane() {
