@@ -3,6 +3,7 @@ package org.mam.kch.fyreagenda;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +19,8 @@ import android.view.MenuItem;
 public class TaskDetailActivity extends AppCompatActivity {
 
     private boolean editMode;
+    TaskDetailFragment detailFragment;
+    TaskEditFragment editFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,8 +30,6 @@ public class TaskDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_task_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
-
-
 
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
@@ -51,10 +52,10 @@ public class TaskDetailActivity extends AppCompatActivity {
             Bundle arguments = new Bundle();
             arguments.putString(TaskDetailFragment.ARG_ITEM_ID,
                     getIntent().getStringExtra(TaskDetailFragment.ARG_ITEM_ID));
-            TaskDetailFragment fragment = new TaskDetailFragment();
-            fragment.setArguments(arguments);
+            detailFragment = new TaskDetailFragment();
+            detailFragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.task_detail_container, fragment)
+                    .add(R.id.task_detail_container, detailFragment)
                     .commit();
         }
 
@@ -64,14 +65,43 @@ public class TaskDetailActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         if (editMode) {
+                            editFragment.saveData();
+
+                            // Create the detail fragment and add it to the activity
+                            // using a fragment transaction.
                             Bundle arguments = new Bundle();
                             arguments.putString(TaskDetailFragment.ARG_ITEM_ID,
                                     getIntent().getStringExtra(TaskDetailFragment.ARG_ITEM_ID));
-                            TaskDetailFragment fragment = new TaskDetailFragment();
-                            fragment.setArguments(arguments);
+                            detailFragment = new TaskDetailFragment();
+                            detailFragment.setArguments(arguments);
                             getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.task_detail_container, fragment)
+                                    .replace(R.id.task_detail_container, detailFragment)
                                     .commit();
+                            // Bottom popup allows user to undo.
+                            Snackbar snackbar = Snackbar
+                                    .make(findViewById(R.id.task_detail_container), "Task is saved", Snackbar.LENGTH_LONG)
+                                    .setAction("UNDO", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            editFragment.undoSaveData();
+
+                                            // Create the detail fragment and add it to the activity
+                                            // using a fragment transaction.
+                                            Bundle arguments = new Bundle();
+                                            arguments.putString(TaskDetailFragment.ARG_ITEM_ID,
+                                                    getIntent().getStringExtra(TaskDetailFragment.ARG_ITEM_ID));
+                                            detailFragment = new TaskDetailFragment();
+                                            detailFragment.setArguments(arguments);
+                                            getSupportFragmentManager().beginTransaction()
+                                                    .replace(R.id.task_detail_container, detailFragment)
+                                                    .commit();
+
+                                            Snackbar snackbar1 = Snackbar.make(findViewById(R.id.task_detail_container), "Task edit undone!", Snackbar.LENGTH_SHORT);
+                                            snackbar1.show();
+                                        }
+                                    });
+
+                            snackbar.show();
                             fab.setImageDrawable(getDrawable(R.drawable.ic_create_black));
 
                             editMode = false;
@@ -80,10 +110,10 @@ public class TaskDetailActivity extends AppCompatActivity {
                             Bundle arguments = new Bundle();
                             arguments.putString(TaskDetailFragment.ARG_ITEM_ID,
                                     getIntent().getStringExtra(TaskDetailFragment.ARG_ITEM_ID));
-                            TaskEditFragment fragment = new TaskEditFragment();
-                            fragment.setArguments(arguments);
+                            editFragment = new TaskEditFragment();
+                            editFragment.setArguments(arguments);
                             getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.task_detail_container, fragment)
+                                    .replace(R.id.task_detail_container, editFragment)
                                     .commit();
                             fab.setImageDrawable(getDrawable(R.drawable.ic_check_black));
 

@@ -7,6 +7,7 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -31,6 +32,7 @@ public class TaskEditFragment extends Fragment {
      * The dummy name this fragment is presenting.
      */
     private static Task.TaskItem mItem;
+    private static Task.TaskItem oldData;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -86,19 +88,36 @@ public class TaskEditFragment extends Fragment {
     }
 
     public void saveData(){
+        oldData = Task.cloneTask(mItem);
         mItem.setName(nameInput.getText().toString());
         mItem.setDetails(detailsInput.getText().toString());
         mItem.setTaskType(spinner.getSelectedItemPosition());
         Task.saveItem(mItem);
-
+    }
+    public void undoSaveData(){
+        if(mItem.getTaskType()!=oldData.getTaskType())
+            oldData.setTaskType(oldData.getTaskTypeValue());
+        mItem = oldData;
+        Task.saveItem(mItem);
+    }
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = activity.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
     @Override
     public void onDetach() {
         super.onDetach();
+        this.hideKeyboard(this.getActivity());
         // Save the new data
-        mItem.setName(nameInput.getText().toString());
+        /*mItem.setName(nameInput.getText().toString());
         mItem.setDetails(detailsInput.getText().toString());
         mItem.setTaskType(spinner.getSelectedItemPosition());
-        Task.saveItem(mItem);
+        Task.saveItem(mItem);*/
     }
 }

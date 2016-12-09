@@ -26,6 +26,9 @@ public class Task {
         public String getName(){
             return this.name;
         }
+        public int getValue(){
+            return this.value;
+        }
     }
 
     /**
@@ -42,6 +45,8 @@ public class Task {
     public static final Map<String, TaskItem> ITEM_MAP = new HashMap<String, TaskItem>();
 
     private static int COUNT = 0;
+
+
 
     static {
         // Add some sample items.
@@ -69,25 +74,56 @@ public class Task {
         }
     }
 
+    public static ArrayList<Task.TaskItem> getList(int i){
+        if(i==1)
+            return NEXTWEEK;
+        else if(i==2)
+            return THISMONTH;
+        else if(i==3)
+            return ARCHIVE;
+        else
+            return THISWEEK;
+    }
+    public static void addItemBack(TaskItem item) {
+        if(Integer.parseInt(item.id)<Task.COUNT) {
+            Task.getList(item.getTaskTypeValue()).add(item.getPos(), item);
+            return;
+        }
+        else
+            addItem(item);
+    }
     public static void addItem(TaskItem item) {
         ITEM_MAP.put(item.id, item);
-        if(item.getTaskType()==TaskType.THISWEEK)
-            THISWEEK.add(item);
-        if(item.getTaskType()==TaskType.NEXTWEEK)
-            NEXTWEEK.add(item);
-        if(item.getTaskType()==TaskType.THISMONTH)
-            THISMONTH.add(item);
-        if(item.getTaskType()==TaskType.ARCHIVED)
-            ARCHIVE.add(item);
+        Task.getList(item.getTaskType().getValue()).add(item);
     }
 
-
     public static void removeItem(TaskItem item){
-        THISWEEK.remove(item);
-        NEXTWEEK.remove(item);
-        THISMONTH.remove(item);
-        ARCHIVE.remove(item);
-        ITEM_MAP.remove(item);
+        // removes all items with the same id as item from list, not map
+        for(int j = 0;j< 4; j++) {
+            for (int i = 0; i < Task.getList(j).size(); i++) {
+                if(Task.getList(j).get(i).id == item.id) {
+                    Task.getList(j).remove(i);
+                    for (int k = i; k < Task.getList(j).size(); k++){
+                        Task.getList(j).get(i).setPos(k);
+                    }
+                    i--;
+                }
+            }
+        }
+    }
+
+    private static void updateItemListing(TaskItem item){
+        // checks to see if in same list, if so updates that entry
+        for(int i = 0;i< Task.getList(item.getTaskTypeValue()).size(); i++) {
+            if (Task.getList(item.getTaskTypeValue()).get(i).id == item.id) {
+                Task.getList(item.getTaskTypeValue()).set(i,item);
+                ITEM_MAP.put(item.id, item);
+                return;
+            }
+        }
+        // else, removes item from all lists and adds item back in at end of list specified by item
+        Task.removeItem(item);
+        Task.addItem(item);
     }
 
     public static void saveItem(TaskItem item){
@@ -99,11 +135,21 @@ public class Task {
             addItem(item);}
         else if(item.isEdited()){
             item.saved();
-            ITEM_MAP.put(item.id, item);
+            updateItemListing(item);
         }
     }
 
-
+    // Creates a clone of item and returns it. Does not increase TaskItem count (Task.COUNT)
+    public static TaskItem cloneTask(TaskItem item){
+        Task.TaskItem clone = new Task.TaskItem(item.id, item.name, item.details,item.taskType);
+        clone.pos = item.pos;
+        clone.creationTime = item.creationTime;
+        clone.completionTime = item.completionTime;
+        clone.taskComplete = item.taskComplete;
+        clone.edited = true;
+        clone.newTaskType = item.newTaskType;
+        return clone;
+    }
 
     public static TaskItem createTaskItem() {
         Task.COUNT++;
@@ -137,6 +183,7 @@ public class Task {
         public final String id;
         private String name;
         private String details;
+        private int pos;                // Knows where in list it is
         private long creationTime;
         private long completionTime;
         private TaskType taskType;
@@ -144,10 +191,11 @@ public class Task {
         private boolean edited;
         private boolean newTaskType;
 
-        public TaskItem(String id, String name, String details, TaskType taskType) {
+        private TaskItem(String id, String name, String details, TaskType taskType) {
             this.id = id;
             this.name = name;
             this.details = details;
+            this.pos = getList(taskType.getValue()).size();
             this.taskType = taskType;
             this.creationTime = System.currentTimeMillis();
             this.completionTime = 0;
@@ -194,7 +242,9 @@ public class Task {
             this.edited = true;
             this.completionTime = System.currentTimeMillis();
             this.taskComplete = true;}
-
+        public int getPos(){
+            return this.pos;
+        }
         public boolean getTaskComplete(){
             return this.taskComplete;}
 
@@ -224,7 +274,7 @@ public class Task {
             return 0;
         }
 
-        private TaskItem(Parcel source) {
+        public TaskItem(Parcel source) {
             this.id = source.readString();
             this.name = source.readString();
             this.details = source.readString();
@@ -268,5 +318,9 @@ public class Task {
                 return new TaskItem[size];
             }
         };
+
+        public void setPos(int pos) {
+            this.pos = pos;
+        }
     }
 }
