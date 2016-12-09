@@ -82,11 +82,12 @@ public class Task {
     }
 
 
-    private static void removeItem(TaskItem item){
+    public static void removeItem(TaskItem item){
         THISWEEK.remove(item);
         NEXTWEEK.remove(item);
         THISMONTH.remove(item);
         ARCHIVE.remove(item);
+        ITEM_MAP.remove(item);
     }
 
     public static void saveItem(TaskItem item){
