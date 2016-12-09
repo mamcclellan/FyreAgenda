@@ -68,8 +68,7 @@ public class TaskListActivity extends AppCompatActivity {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                final View viewf = view;
+            public void onClick(final View view) {
                 // get prompts.xml view
                 LayoutInflater li = LayoutInflater.from(context);
                 View promptsView = li.inflate(R.layout.new_task_prompt, null);
@@ -92,10 +91,24 @@ public class TaskListActivity extends AppCompatActivity {
                                         // get user input and set it to result
                                         // edit text
                                         result =userInput.getText().toString();
-                                        Task.addItem(Task.createTaskItem(result));
+                                        final Task.TaskItem newTask;
+                                        //create a new TaskItem and assign the task type based on current view int. If archived view, sets to this week.
+                                        newTask = Task.createTaskItem(result);
+                                        newTask.setTaskType(viewPager.getCurrentItem());
+                                        Task.addItem(newTask);
                                         viewPager.getAdapter().notifyDataSetChanged();
-                                        Snackbar.make(viewf, "Item Added", Snackbar.LENGTH_LONG)
-                                                .setAction("Action", null).show();
+                                        Snackbar snackbar = Snackbar
+                                                .make(view, "Task Added", Snackbar.LENGTH_LONG)
+                                                .setAction("UNDO", new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View view) {
+                                                        Task.removeItem(newTask);
+                                                        viewPager.getAdapter().notifyDataSetChanged();
+                                                        Snackbar snackbar1 = Snackbar.make(view, "Task is deleted!", Snackbar.LENGTH_SHORT);
+                                                        snackbar1.show();
+                                                    }
+                                                });
+                                        snackbar.show();
                                     }
                                 })
                         .setNegativeButton("Cancel",
