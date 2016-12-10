@@ -3,6 +3,7 @@ package org.mam.kch.fyreagenda;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.ActionMode;
@@ -133,10 +134,47 @@ public class RecyclerAdapter
             switch (item.getItemId()) {
                 case R.id.delete:
                     Task.removeItem(selectedItem);
-                    mValues.remove(selectedItem);
                     ((TaskListActivity) mainActivity).refreshRecycleView();
-                    selectedItem = null;
+                    View v = mainActivity.findViewById(R.id.app_bar);
+                    Snackbar snackbar = Snackbar
+                            .make(v, "Task deleted", Snackbar.LENGTH_LONG)
+                            .setAction("UNDO", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Task.addItemBack(selectedItem);
+                                    ((TaskListActivity) mainActivity).refreshRecycleView();
+                                    Snackbar snackbar1 = Snackbar.make(view, "Task delete undone!", Snackbar.LENGTH_SHORT);
+                                    snackbar1.show();
+                                }
+                            });
+                    snackbar.show();
                     mode.finish(); // Action picked, so close the CAB
+                    return true;
+                case R.id.archive:
+                    final int savedPosition = mValues.indexOf(selectedItem);
+                    final Task.TaskType savedType = selectedItem.getTaskType();
+                    Task.removeItem(selectedItem);
+                    selectedItem.setTaskType(Task.TaskType.ARCHIVED);
+                    Task.addItem(selectedItem);
+                    ((TaskListActivity) mainActivity).refreshRecycleView();
+                    snackbar = Snackbar
+                            .make(mainActivity.findViewById(R.id.app_bar), "Task archived", Snackbar.LENGTH_LONG)
+                            .setAction("UNDO", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Task.removeItem(selectedItem);
+                                    selectedItem.setTaskType(savedType);
+                                    // This is inefficient, so clean up when not so lazy
+                                    Task.addItemBack(selectedItem);
+                                    mValues.remove(selectedItem);
+                                    mValues.add(savedPosition, selectedItem);
+                                    ((TaskListActivity) mainActivity).refreshRecycleView();
+                                    Snackbar snackbar1 = Snackbar.make(view, "Task archive undone!", Snackbar.LENGTH_SHORT);
+                                    snackbar1.show();
+                                }
+                            });
+                    snackbar.show();
+                    mode.finish();
                     return true;
                 default:
                     return false;
