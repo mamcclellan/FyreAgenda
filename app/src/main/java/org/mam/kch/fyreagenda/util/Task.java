@@ -84,6 +84,8 @@ public class Task {
         else
             return THISWEEK;
     }
+
+    // Helpful!
     public static void addItemBack(TaskItem item) {
         if(Integer.parseInt(item.id)<Task.COUNT) {
             Task.getList(item.getTaskTypeValue()).add(item.getPos(), item);
@@ -99,6 +101,7 @@ public class Task {
 
     public static void removeItem(TaskItem item){
         // removes all items with the same id as item from list, not map
+        // For the love of GAWD make this more comprehensible
         for(int j = 0;j< 4; j++) {
             for (int i = 0; i < Task.getList(j).size(); i++) {
                 if(Task.getList(j).get(i).id == item.id) {

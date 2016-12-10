@@ -79,7 +79,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                                     .commit();
                             // Bottom popup allows user to undo.
                             Snackbar snackbar = Snackbar
-                                    .make(findViewById(R.id.task_detail_container), "Task is saved", Snackbar.LENGTH_LONG)
+                                    .make(v, "Task is saved", Snackbar.LENGTH_LONG)
                                     .setAction("UNDO", new View.OnClickListener() {
                                         @Override
                                         public void onClick(View view) {
@@ -96,7 +96,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                                                     .replace(R.id.task_detail_container, detailFragment)
                                                     .commit();
 
-                                            Snackbar snackbar1 = Snackbar.make(findViewById(R.id.task_detail_container), "Task edit undone!", Snackbar.LENGTH_SHORT);
+                                            Snackbar snackbar1 = Snackbar.make(view, "Task edit undone!", Snackbar.LENGTH_SHORT);
                                             snackbar1.show();
                                         }
                                     });

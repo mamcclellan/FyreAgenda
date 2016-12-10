@@ -113,11 +113,6 @@ public class TaskEditFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        this.hideKeyboard(this.getActivity());
-        // Save the new data
-        /*mItem.setName(nameInput.getText().toString());
-        mItem.setDetails(detailsInput.getText().toString());
-        mItem.setTaskType(spinner.getSelectedItemPosition());
-        Task.saveItem(mItem);*/
+        hideKeyboard(this.getActivity());
     }
 }
