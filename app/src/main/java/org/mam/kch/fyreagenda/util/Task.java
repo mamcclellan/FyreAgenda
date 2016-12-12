@@ -90,7 +90,6 @@ public class Task {
         if(Integer.parseInt(item.id)<Task.COUNT) {
             // this is the reason we need the pos value stored in the TaskItem.
             Task.getList(item.getTaskTypeValue()).add(pos, item);
-            return;
         }
         else
             addItem(item);
@@ -106,7 +105,7 @@ public class Task {
         for(int thisList = 0;thisList< 4; thisList++) {
             // thisTask is the position in the array list of the task
             for (int thisTask = 0; thisTask < Task.getList(thisList).size(); thisTask++) {
-                if(Task.getList(thisList).get(thisTask).id == item.id) {
+                if(Task.getList(thisList).get(thisTask).id.equals(item.id)) {
                     Task.getList(thisList).remove(thisTask);
                     thisTask--;
                 }
@@ -117,7 +116,7 @@ public class Task {
     private static void updateItemListing(TaskItem item){
         // checks to see if in same list, if so updates that entry
         for(int i = 0;i< Task.getList(item.getTaskTypeValue()).size(); i++) {
-            if (Task.getList(item.getTaskTypeValue()).get(i).id == item.id) {
+            if (Task.getList(item.getTaskTypeValue()).get(i).id.equals(item.id)) {
                 Task.getList(item.getTaskTypeValue()).set(i,item);
                 ITEM_MAP.put(item.id, item);
                 return;
@@ -152,7 +151,7 @@ public class Task {
         return clone;
     }
 
-    public static TaskItem createTaskItem() {
+    private static TaskItem createTaskItem() {
         Task.COUNT++;
         return new TaskItem(String.valueOf(Task.COUNT), "Item " + Task.COUNT,
                 makeDetails(Task.COUNT), TaskType.THISWEEK);
@@ -176,9 +175,6 @@ public class Task {
         return builder.toString();
     }
 
-    /**
-     * A dummy item representing a piece of name.
-     */
     public static class TaskItem implements Serializable, Parcelable{
 
         public final String id;
@@ -250,13 +246,13 @@ public class Task {
         public long getCreationTime(){
             return this.creationTime;}
 
-        public boolean isEdited(){
+        private boolean isEdited(){
             return this.edited;}
 
-        public boolean isNewTaskType(){
+        private boolean isNewTaskType(){
             return this.newTaskType;}
 
-        public void saved(){
+        private void saved(){
             this.newTaskType = false;
             this.edited = false;}
 
