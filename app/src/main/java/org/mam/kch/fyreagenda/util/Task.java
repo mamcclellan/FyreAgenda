@@ -86,9 +86,10 @@ public class Task {
     }
 
     // Helpful!
-    public static void addItemBack(TaskItem item) {
+    public static void addItemBack(TaskItem item, int pos) {
         if(Integer.parseInt(item.id)<Task.COUNT) {
-            Task.getList(item.getTaskTypeValue()).add(item.getPos(), item);
+            // this is the reason we need the pos value stored in the TaskItem.
+            Task.getList(item.getTaskTypeValue()).add(pos, item);
             return;
         }
         else
@@ -100,16 +101,14 @@ public class Task {
     }
 
     public static void removeItem(TaskItem item){
-        // removes all items with the same id as item from list, not map
-        // For the love of GAWD make this more comprehensible
-        for(int j = 0;j< 4; j++) {
-            for (int i = 0; i < Task.getList(j).size(); i++) {
-                if(Task.getList(j).get(i).id == item.id) {
-                    Task.getList(j).remove(i);
-                    for (int k = i; k < Task.getList(j).size(); k++){
-                        Task.getList(j).get(i).setPos(k);
-                    }
-                    i--;
+        // removes all items with the same id as item from list, but not the map
+        // thisList selects the list to find item on.
+        for(int thisList = 0;thisList< 4; thisList++) {
+            // thisTask is the position in the array list of the task
+            for (int thisTask = 0; thisTask < Task.getList(thisList).size(); thisTask++) {
+                if(Task.getList(thisList).get(thisTask).id == item.id) {
+                    Task.getList(thisList).remove(thisTask);
+                    thisTask--;
                 }
             }
         }
@@ -145,7 +144,6 @@ public class Task {
     // Creates a clone of item and returns it. Does not increase TaskItem count (Task.COUNT)
     public static TaskItem cloneTask(TaskItem item){
         Task.TaskItem clone = new Task.TaskItem(item.id, item.name, item.details,item.taskType);
-        clone.pos = item.pos;
         clone.creationTime = item.creationTime;
         clone.completionTime = item.completionTime;
         clone.taskComplete = item.taskComplete;
@@ -186,7 +184,6 @@ public class Task {
         public final String id;
         private String name;
         private String details;
-        private int pos;                // Knows where in list it is
         private long creationTime;
         private long completionTime;
         private TaskType taskType;
@@ -198,7 +195,6 @@ public class Task {
             this.id = id;
             this.name = name;
             this.details = details;
-            this.pos = getList(taskType.getValue()).size();
             this.taskType = taskType;
             this.creationTime = System.currentTimeMillis();
             this.completionTime = 0;
@@ -224,13 +220,14 @@ public class Task {
             this.details = details;}
 
         public void setTaskType(TaskType taskType){
-            this.edited = true;
-            if(this.taskType != taskType)
+            if(this.taskType != taskType){
+                this.edited = true;
                 this.newTaskType = true;
+            }
             this.taskType = taskType;}
         public void setTaskType(int i){
-            this.edited = true;
             if(this.taskType.value != i){
+                this.edited = true;
                 this.newTaskType = true;
                 if(i == 0)
                     this.taskType = TaskType.THISWEEK;
@@ -238,16 +235,12 @@ public class Task {
                     this.taskType = TaskType.NEXTWEEK;
                 if(i == 2)
                     this.taskType = TaskType.THISMONTH;
-            }
-            this.taskType = taskType;}
+            }}
 
         public void setTaskComplete(){
             this.edited = true;
             this.completionTime = System.currentTimeMillis();
             this.taskComplete = true;}
-        public int getPos(){
-            return this.pos;
-        }
         public boolean getTaskComplete(){
             return this.taskComplete;}
 
@@ -321,9 +314,5 @@ public class Task {
                 return new TaskItem[size];
             }
         };
-
-        public void setPos(int pos) {
-            this.pos = pos;
-        }
     }
 }
