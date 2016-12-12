@@ -113,6 +113,39 @@ public class TaskListActivity extends AppCompatActivity {
                                         snackbar.show();
                                     }
                                 })
+                        .setNeutralButton("EDIT",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        // get user input and set it to result
+                                        // edit text
+                                        result =userInput.getText().toString();
+                                        final Task.TaskItem newTask;
+                                        //create a new TaskItem and assign the task type based on current view int. If archived view, sets to this week.
+                                        newTask = Task.createTaskItem(result);
+                                        newTask.setTaskType(viewPager.getCurrentItem());
+                                        Task.addItem(newTask);
+                                        viewPager.getAdapter().notifyDataSetChanged();
+
+                                        // go to edit screen.
+
+                                        if (TaskListActivity.isTwoPane()) {
+                                            Bundle arguments = new Bundle();
+                                            arguments.putString(TaskEditFragment.ARG_ITEM_ID, newTask.id);
+                                            TaskEditFragment fragment = new TaskEditFragment();
+                                            fragment.setArguments(arguments);
+                                            // Below -- figure out how to incorporate this
+                                            //getSupportFragmentManager().beginTransaction()
+                                            //.replace(R.id.task_detail_container, fragment)
+                                            //.commit();
+                                        } else {
+                                            Context context = view.getContext();
+                                            Intent intent = new Intent(context, TaskDetailActivity.class);
+                                            intent.putExtra(TaskEditFragment.ARG_ITEM_ID, newTask.id);
+
+                                            context.startActivity(intent);
+                                        }
+                                    }
+                                })
                         .setNegativeButton("Cancel",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog,int id) {
