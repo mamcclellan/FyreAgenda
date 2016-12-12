@@ -131,17 +131,19 @@ public class RecyclerAdapter
         // Called when the user selects a contextual menu item
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            final int savedPosition;
+            View v = mainActivity.findViewById(R.id.app_bar);
             switch (item.getItemId()) {
                 case R.id.delete:
+                    savedPosition = mValues.indexOf(selectedItem);
                     Task.removeItem(selectedItem);
                     ((TaskListActivity) mainActivity).refreshRecycleView();
-                    View v = mainActivity.findViewById(R.id.app_bar);
                     Snackbar snackbar = Snackbar
                             .make(v, "Task deleted", Snackbar.LENGTH_LONG)
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    Task.addItemBack(selectedItem);
+                                    Task.addItemBack(selectedItem, savedPosition);
                                     ((TaskListActivity) mainActivity).refreshRecycleView();
                                     Snackbar snackbar1 = Snackbar.make(view, "Task delete undone!", Snackbar.LENGTH_SHORT);
                                     snackbar1.show();
@@ -151,21 +153,21 @@ public class RecyclerAdapter
                     mode.finish(); // Action picked, so close the CAB
                     return true;
                 case R.id.archive:
-                    final int savedPosition = mValues.indexOf(selectedItem);
+                    savedPosition = mValues.indexOf(selectedItem);
                     final Task.TaskType savedType = selectedItem.getTaskType();
                     Task.removeItem(selectedItem);
                     selectedItem.setTaskType(Task.TaskType.ARCHIVED);
                     Task.addItem(selectedItem);
                     ((TaskListActivity) mainActivity).refreshRecycleView();
                     snackbar = Snackbar
-                            .make(mainActivity.findViewById(R.id.app_bar), "Task archived", Snackbar.LENGTH_LONG)
+                            .make(v, "Task archived", Snackbar.LENGTH_LONG)
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     Task.removeItem(selectedItem);
                                     selectedItem.setTaskType(savedType);
                                     // This is inefficient, so clean up when not so lazy
-                                    Task.addItemBack(selectedItem);
+                                    Task.addItemBack(selectedItem, savedPosition);
                                     mValues.remove(selectedItem);
                                     mValues.add(savedPosition, selectedItem);
                                     ((TaskListActivity) mainActivity).refreshRecycleView();
