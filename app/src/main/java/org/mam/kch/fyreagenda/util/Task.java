@@ -6,6 +6,8 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,49 +29,14 @@ public class Task {
         }
     }
 
-    /**
-     * An array of sample (dummy) items.
-     */
     public static final ArrayList<TaskItem> THISWEEK = new ArrayList<TaskItem>();
     public static final ArrayList<TaskItem> NEXTWEEK = new ArrayList<TaskItem>();
     public static final ArrayList<TaskItem> THISMONTH = new ArrayList<TaskItem>();
     public static final ArrayList<TaskItem> ARCHIVE = new ArrayList<TaskItem>();
     private static DatabaseHandler database;
 
-    /**
-     * A map of sample (dummy) items, by ID.
-     */
     public static final Map<String, TaskItem> ITEM_MAP = new HashMap<String, TaskItem>();
 
-    private static int COUNT = 0;
-
-
-//
-//    static {
-//        // Add some sample items.
-//        // This is called immediately on program loading for development purposes
-//        for (int i = 1; i <= 5; i++) {
-//            addItem(createTaskItem());
-//        }
-//        for (int i = 1; i <= 5; i++) {
-//            Task.COUNT++;
-//            TaskItem item = new TaskItem(String.valueOf(Task.COUNT), "Next Week " + Task.COUNT,
-//                    makeDetails(Task.COUNT), TaskType.NEXTWEEK);
-//            addItem(item);
-//        }
-//        for (int i = 1; i <= 5; i++) {
-//            Task.COUNT++;
-//            TaskItem item = new TaskItem(String.valueOf(Task.COUNT), "This month " + Task.COUNT,
-//                    makeDetails(Task.COUNT), TaskType.THISMONTH);
-//            addItem(item);
-//        }
-//        for (int i = 1; i <= 5; i++) {
-//            Task.COUNT++;
-//            TaskItem item = new TaskItem(String.valueOf(Task.COUNT), "ARCHIVE " + Task.COUNT,
-//                    makeDetails(Task.COUNT), TaskType.ARCHIVED);
-//            addItem(item);
-//        }
-//    }
 
     public static ArrayList<Task.TaskItem> getList(int i){
         if(i==1)
@@ -86,69 +53,69 @@ public class Task {
 
         if (database == null) {
             database = new DatabaseHandler(context);
-            Task.COUNT = Task.THISWEEK.size() + Task.NEXTWEEK.size() +
-                    Task.THISMONTH.size() + Task.ARCHIVE.size();
         }
 
         if (!database.loadTasks()) {
+            int COUNT = 0;
             for (int i = 1; i <= 5; i++) {
-                TaskItem item = createTaskItem();
+                COUNT++;
+                TaskItem item = new TaskItem("This Week " + COUNT,
+                        makeDetails(), TaskType.THISWEEK);
                 addItem(item);
-                //database.addTask(item);
             }
             for (int i = 1; i <= 5; i++) {
-                Task.COUNT++;
-                TaskItem item = new TaskItem(String.valueOf(Task.COUNT), "Next Week " + Task.COUNT,
-                        makeDetails(Task.COUNT), TaskType.NEXTWEEK);
+                COUNT++;
+                TaskItem item = new TaskItem("Next Week " + COUNT,
+                        makeDetails(), TaskType.NEXTWEEK);
                 addItem(item);
-                //database.addTask(item);
             }
             for (int i = 1; i <= 5; i++) {
-                Task.COUNT++;
-                TaskItem item = new TaskItem(String.valueOf(Task.COUNT), "This month " + Task.COUNT,
-                        makeDetails(Task.COUNT), TaskType.THISMONTH);
+                COUNT++;
+                TaskItem item = new TaskItem("This month " + COUNT,
+                        makeDetails(), TaskType.THISMONTH);
                 addItem(item);
-                //database.addTask(item);
             }
             for (int i = 1; i <= 5; i++) {
-                Task.COUNT++;
-                TaskItem item = new TaskItem(String.valueOf(Task.COUNT), "ARCHIVE " + Task.COUNT,
-                        makeDetails(Task.COUNT), TaskType.ARCHIVED);
+                COUNT++;
+                TaskItem item = new TaskItem("ARCHIVE " + COUNT,
+                        makeDetails(), TaskType.ARCHIVED);
                 addItem(item);
-                //database.addTask(item);
             }
         }
+
+        sortLists();
     }
 
-    // Helpful!
+    private static void sortLists() {
+        Collections.sort(Task.THISWEEK);
+        Collections.sort(Task.NEXTWEEK);
+        Collections.sort(Task.THISMONTH);
+        Collections.sort(Task.ARCHIVE);
+    }
+
     public static void addItemBack(TaskItem item, int position) {
-        if(Integer.parseInt(item.id)<Task.COUNT) {
-            // this is the reason we need the pos value stored in the TaskItem.
-            Task.getList(item.getTaskTypeValue()).add(position, item);
-            //database.addTask(item);
-        }
-        else
-            addItem(item);
-    }
-    public static void addItem(TaskItem item) {
-        ITEM_MAP.put(item.id, item);
-        Task.getList(item.getTaskType().getValue()).add(item);
-        //database.addTask(item);
+        item.setListPosition(position);
+        database.addTask(item);
+        ITEM_MAP.put(String.valueOf(item.id), item);
+        Task.getList(item.getTaskTypeValue()).add(position, item);
     }
 
-    public static void removeItem(TaskItem item){
-        // removes all items with the same id as item from list, but not the map
-        // thisList selects the list to find item on.
-        for(int thisList = 0;thisList< 4; thisList++) {
-            // thisTask is the position in the array list of the task
-            for (int thisTask = 0; thisTask < Task.getList(thisList).size(); thisTask++) {
-                if(Task.getList(thisList).get(thisTask).id.equals(item.id)) {
-                    Task.getList(thisList).remove(thisTask);
-                    //database.deleteTask(item);
-                    thisTask--;
-                }
-            }
-        }
+    public static void addItem(TaskItem item) {
+        item.setListPosition(Task.getList(item.getTaskType().getValue()).size());
+        database.addTask(item);
+        ITEM_MAP.put(String.valueOf(item.id), item);
+        Task.getList(item.getTaskType().getValue()).add(item);
+    }
+
+    public static void addItemFromDatabase(TaskItem item) {
+        ITEM_MAP.put(String.valueOf(item.id), item);
+        Task.getList(item.getTaskType().getValue()).add(item);
+    }
+
+    public static void removeItem(TaskItem item) {
+        ArrayList<Task.TaskItem> list = Task.getList(item.getTaskType().getValue());
+        list.remove(item);
+        database.deleteTask(item);
     }
 
     private static void updateItemListing(TaskItem item){
@@ -156,7 +123,7 @@ public class Task {
         for(int i = 0;i< Task.getList(item.getTaskTypeValue()).size(); i++) {
             if (Task.getList(item.getTaskTypeValue()).get(i).id.equals(item.id)) {
                 Task.getList(item.getTaskTypeValue()).set(i,item);
-                ITEM_MAP.put(item.id, item);
+                ITEM_MAP.put(String.valueOf(item.id), item);
                 //database.updateTask(item);
                 return;
             }
@@ -168,26 +135,25 @@ public class Task {
     }
 
     public static void saveItem(TaskItem item){
-        if(item.isNewTaskType()){
+        if(item.isNewTaskType()) {
             removeItem(ITEM_MAP.get(item.id));
-            //database.deleteTask(ITEM_MAP.get(item.id));
             item.saved();
             if(item.getTaskType() == TaskType.ARCHIVED)
                 item.setEdited(true);
             item.setCompletionTime(System.currentTimeMillis());
             item.setTaskComplete(true);
             addItem(item);
-            //database.addTask(item);
         }
-        else if(item.isEdited()){
+        else if(item.isEdited()) {
             item.saved();
+            database.updateTask(item);
             updateItemListing(item);
         }
     }
 
     // Creates a clone of item and returns it. Does not increase TaskItem count (Task.COUNT)
     public static TaskItem cloneTask(TaskItem item){
-        Task.TaskItem clone = new Task.TaskItem(item.id, item.name, item.details,item.taskType);
+        Task.TaskItem clone = new Task.TaskItem(item.name, item.details,item.taskType);
         clone.creationTime = item.creationTime;
         clone.completionTime = item.completionTime;
         clone.taskComplete = item.taskComplete;
@@ -196,31 +162,24 @@ public class Task {
         return clone;
     }
 
-    private static TaskItem createTaskItem() {
-        Task.COUNT++;
-        return new TaskItem(String.valueOf(Task.COUNT), "Item " + Task.COUNT,
-                makeDetails(Task.COUNT), TaskType.THISWEEK);
-    }
-
     public static TaskItem createTaskItem(String name) {
-        Task.COUNT++;
         if(name.equals("")){
-            return new TaskItem(String.valueOf(Task.COUNT), "Item " + Task.COUNT,
-                    makeDetails(Task.COUNT), TaskType.THISWEEK);
+            return new TaskItem("New Item",
+                    makeDetails(), TaskType.THISWEEK);
         }
-        return new TaskItem(String.valueOf(Task.COUNT), name,
+        return new TaskItem(name,
                 "No details set.", TaskType.THISWEEK);
     }
 
-    private static String makeDetails(int position) {
+    private static String makeDetails() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Details about Item: ").append(position);
+        builder.append("Details about Item: ");
         builder.append("\nMore details information here.");
 
         return builder.toString();
     }
 
-    public static class TaskItem implements Serializable, Parcelable{
+    public static class TaskItem implements Serializable, Parcelable, Comparable{
 
         public String id;
         private String name;
@@ -231,13 +190,13 @@ public class Task {
         private boolean taskComplete;
         private boolean edited;
         private boolean newTaskType;
+        private int listPosition;
 
         TaskItem() {
 
         }
 
-        public TaskItem(String id, String name, String details, TaskType taskType) {
-            this.id = id;
+        public TaskItem(String name, String details, TaskType taskType) {
             this.name = name;
             this.details = details;
             this.taskType = taskType;
@@ -342,6 +301,14 @@ public class Task {
             this.newTaskType = newTaskType;
         }
 
+        public int getListPosition() {
+            return listPosition;
+        }
+
+        public void setListPosition(int listPosition) {
+            this.listPosition = listPosition;
+        }
+
         private void saved(){
             this.newTaskType = false;
             this.edited = false;}
@@ -402,5 +369,9 @@ public class Task {
         };
 
 
+        @Override
+        public int compareTo(Object taskItem) {
+            return this.getListPosition() - ((TaskItem) taskItem).getListPosition();
+        }
     }
 }
