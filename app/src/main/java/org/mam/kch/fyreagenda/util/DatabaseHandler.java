@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class DatabaseHandler extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "taskManager";
+    private static final String DATABASE_NAME = "theartistformallyknownasFYRE!";
     private static final String TABLE_TASKS = "tasks";
 
     private static final String KEY_ID = "id";
@@ -23,7 +23,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_TASK_COMPLETE = "task_complete";
     private static final String KEY_EDITED = "task_edited";
     private static final String KEY_NEW_TASK_TYPE = "new_task_type";
-
+    private static final String KEY_LIST_POSITION = "list_position";
 
 
     public DatabaseHandler(Context context) {
@@ -37,7 +37,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + KEY_DETAILS + " TEXT," + KEY_CREATION_TIME + " INTEGER,"
                 + KEY_COMPLETION_TIME + " INTEGER," + KEY_TASK_TYPE + " INTEGER,"
                 + KEY_TASK_COMPLETE + " BOOLEAN," + KEY_EDITED + " BOOLEAN,"
-                + KEY_NEW_TASK_TYPE + " BOOLEAN"
+                + KEY_NEW_TASK_TYPE + " BOOLEAN," + KEY_LIST_POSITION + " INTEGER"
                 + ")";
         db.execSQL(create);
     }
@@ -61,9 +61,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_TASK_COMPLETE, taskItem.getTaskComplete());
         values.put(KEY_EDITED, taskItem.isEdited());
         values.put(KEY_NEW_TASK_TYPE, taskItem.isEdited());
+        values.put(KEY_LIST_POSITION, taskItem.getListPosition());
 
-        db.insert(TABLE_TASKS, null, values);
+        int rowID = (int) db.insert(TABLE_TASKS, null, values);
         db.close();
+        taskItem.setID(String.valueOf(rowID));
     }
 
     // Update taskItem
@@ -79,6 +81,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_TASK_COMPLETE, taskItem.getTaskComplete());
         values.put(KEY_EDITED, taskItem.isEdited());
         values.put(KEY_NEW_TASK_TYPE, taskItem.isEdited());
+        values.put(KEY_LIST_POSITION, taskItem.getListPosition());
 
         int result = db.update(TABLE_TASKS, values, KEY_ID + " = ?",
                 new String[] { String.valueOf(taskItem.getID()) });
@@ -122,6 +125,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 else taskItem.setEdited(false);
                 if (cursor.getInt(8) == 1) taskItem.setNewTaskType(true);
                 else taskItem.setNewTaskType(false);
+                taskItem.setListPosition(cursor.getInt(9));
                 int taskTypeValue = cursor.getInt(5);
                 switch(taskTypeValue) {
                     case 0:
@@ -139,7 +143,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     default:
                         taskItem.setTaskType(Task.TaskType.ARCHIVED);
                 }
-                Task.addItem(taskItem);
+
+                Task.addItemFromDatabase(taskItem);
 
             } while (cursor.moveToNext());
         }
