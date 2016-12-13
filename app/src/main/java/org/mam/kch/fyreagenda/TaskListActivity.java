@@ -142,7 +142,7 @@ public class TaskListActivity extends AppCompatActivity {
                                             Context context = view.getContext();
                                             Intent intent = new Intent(context, TaskDetailActivity.class);
                                             intent.putExtra(TaskEditFragment.ARG_ITEM_ID, newTask.id);
-
+                                            intent.putExtra("EditMode", true);
                                             context.startActivity(intent);
                                         }
                                     }
