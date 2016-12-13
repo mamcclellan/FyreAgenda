@@ -2,6 +2,7 @@ package org.mam.kch.fyreagenda;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +25,7 @@ public class RecyclerAdapter
         extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
 
     private final List<Task.TaskItem> mValues;
+    View selectedView;
     private Task.TaskItem selectedItem;
     ActionMode mActionMode;
     AppCompatActivity mainActivity;
@@ -79,7 +81,9 @@ public class RecyclerAdapter
                         }
                         mActionMode = mainActivity.startActionMode(mActionModeCallback);
                         selectedItem = mValues.get(pos);
+                        selectedView = v;
                         v.setSelected(true);
+                        v.setBackgroundColor(Color.argb(150, 0, 0, 255));
                         return true;
                     }
                 }
@@ -186,6 +190,7 @@ public class RecyclerAdapter
         // Called when the user exits the action mode
         @Override
         public void onDestroyActionMode(ActionMode mode) {
+            selectedView.setBackgroundColor(Color.TRANSPARENT);
             mActionMode = null;
         }
     };
