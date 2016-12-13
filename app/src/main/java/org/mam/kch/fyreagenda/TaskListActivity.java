@@ -54,6 +54,7 @@ public class TaskListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Task.loadTasks(getApplicationContext());
         setContentView(R.layout.activity_task_list);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
