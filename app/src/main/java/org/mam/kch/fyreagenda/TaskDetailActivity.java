@@ -26,7 +26,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        editMode = false;
+        editMode = getIntent().getBooleanExtra("EditMode", false);
         setContentView(R.layout.activity_task_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
@@ -52,11 +52,20 @@ public class TaskDetailActivity extends AppCompatActivity {
             Bundle arguments = new Bundle();
             arguments.putString(TaskDetailFragment.ARG_ITEM_ID,
                     getIntent().getStringExtra(TaskDetailFragment.ARG_ITEM_ID));
-            detailFragment = new TaskDetailFragment();
-            detailFragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.task_detail_container, detailFragment)
-                    .commit();
+            if (editMode) {
+                editFragment = new TaskEditFragment();
+                editFragment.setArguments(arguments);
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.task_detail_container, editFragment)
+                        .commit();
+            }
+            else {
+                detailFragment = new TaskDetailFragment();
+                detailFragment.setArguments(arguments);
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.task_detail_container, detailFragment)
+                        .commit();
+            }
         }
 
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -123,6 +132,10 @@ public class TaskDetailActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        if (editMode) {
+            fab.setImageDrawable(getDrawable(R.drawable.ic_check_black));
+        }
     }
 
     @Override
