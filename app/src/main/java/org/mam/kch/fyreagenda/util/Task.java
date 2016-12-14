@@ -39,14 +39,19 @@ public class Task {
 
 
     public static ArrayList<Task.TaskItem> getList(int i){
-        if(i==1)
+        if(i==0)
+            return THISWEEK;
+        else if(i==1)
             return NEXTWEEK;
         else if(i==2)
             return THISMONTH;
         else if(i==3)
             return ARCHIVE;
+        else if(i==4)
+            // Item is marked deleted. No list to put on.
+            return null;
         else
-            return THISWEEK;
+            return null;
     }
 
     public static void loadTasks(Context context) {
@@ -94,20 +99,26 @@ public class Task {
     }
 
     public static void addItemBack(TaskItem item) {
-        Task.getList(item.getTaskTypeValue()).add(item.getListPosition(), item);
-        Task.updatePositions(item.getTaskType());
+        if(Task.getList(item.getTaskTypeValue())!=null){
+            Task.getList(item.getTaskTypeValue()).add(item.getListPosition(), item);
+            Task.updatePositions(item.getTaskType());
+        }
     }
 
     public static void moveItemToNewList(TaskItem item, TaskType taskType){
         if(item.getTaskType() == taskType)
             return;
         ArrayList<TaskItem> list = Task.getList(taskType.getValue());
-        Task.getList(item.getTaskTypeValue()).remove(item);
-        Task.updatePositions(item.getTaskType());
-        item.setTaskType(taskType);
-        item.setListPosition(list.size());
-        list.add(item);
-        Task.updatePositions(taskType);
+        if(Task.getList(item.getTaskTypeValue())!=null) {
+            Task.getList(item.getTaskTypeValue()).remove(item);
+            Task.updatePositions(item.getTaskType());
+        }
+        if(list != null) {
+            item.setTaskType(taskType);
+            item.setListPosition(list.size());
+            list.add(item);
+            Task.updatePositions(taskType);
+        }
     }
     public static void moveItemToNewList(TaskItem item, int taskTypeValue){
         TaskType taskType;
@@ -133,9 +144,11 @@ public class Task {
         moveItemToNewList(item, taskType);
     }
     public static void archiveItem(TaskItem item){
-        ArrayList<Task.TaskItem> list = Task.getList(item.getTaskType().getValue());
-        list.remove(item);
-        Task.updatePositions(item.getTaskType());
+        if(Task.getList(item.getTaskTypeValue())!=null){
+            ArrayList<Task.TaskItem> list = Task.getList(item.getTaskType().getValue());
+            list.remove(item);
+            Task.updatePositions(item.getTaskType());
+        }
         item.setCompletionTime(System.currentTimeMillis());
         item.setTaskComplete(true);
         item.setTaskType(TaskType.ARCHIVED);
@@ -164,8 +177,10 @@ public class Task {
     }
 
     public static void addItemFromDatabase(TaskItem item) {
+        if(Task.getList(item.getTaskTypeValue())!=null){
+            Task.getList(item.getTaskTypeValue()).add(item);
+        }
         ITEM_MAP.put(String.valueOf(item.id), item);
-        Task.getList(item.getTaskType().getValue()).add(item);
     }
 
     public static void switchItemPositions(List<TaskItem> mItems, int fromPosition, int toPosition){
@@ -179,9 +194,11 @@ public class Task {
 
 
     public static void removeItem(TaskItem item) {
-        ArrayList<Task.TaskItem> list = Task.getList(item.getTaskType().getValue());
-        list.remove(item);
-        Task.updatePositions(item.getTaskType());
+        if(Task.getList(item.getTaskType().getValue())!=null){
+            ArrayList<Task.TaskItem> list = Task.getList(item.getTaskType().getValue());
+            list.remove(item);
+            Task.updatePositions(item.getTaskType());
+        }
         item.setTaskType(TaskType.DELETED);
         ITEM_MAP.put(item.getID(),item);
         database.deleteTask(item);
