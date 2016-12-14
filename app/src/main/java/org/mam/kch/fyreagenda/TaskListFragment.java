@@ -1,25 +1,33 @@
 package org.mam.kch.fyreagenda;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import org.mam.kch.fyreagenda.util.Task;
+import org.mam.kch.fyreagenda.util.OnStartDragListener;
+import org.mam.kch.fyreagenda.util.SimpleItemTouchHelperCallback;
 
 import java.util.ArrayList;
 
-public class TaskListFragment extends Fragment {
+public class TaskListFragment extends Fragment  implements OnStartDragListener {
+
+
+    private ItemTouchHelper mItemTouchHelper;
+    private ArrayList<Task.TaskItem> newList;
     /**
      * The fragment argument representing the section number for this
      * fragment.
      */
     private static final String ARG_SECTION_NUMBER = "section_number";
-    RecyclerAdapter adapter;
+    RecyclerListAdapter adapter;
 
     public TaskListFragment() {
 
@@ -27,9 +35,9 @@ public class TaskListFragment extends Fragment {
 
     public void updateList(AppCompatActivity mainActivity) {
         Bundle args = getArguments();
-        ArrayList<Task.TaskItem> newList
+        newList
                 = (ArrayList<Task.TaskItem>) args.getSerializable(ARG_SECTION_NUMBER);
-        adapter = new RecyclerAdapter(newList, mainActivity);
+        adapter = new RecyclerListAdapter(newList, mainActivity, getContext(), this);
     }
 
     /**
@@ -60,4 +68,25 @@ public class TaskListFragment extends Fragment {
         rv.setLayoutManager(llm);
         return rootView;
     }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        RecyclerView recyclerView = (RecyclerView) view;
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapter);
+        mItemTouchHelper = new ItemTouchHelper(callback);
+        mItemTouchHelper.attachToRecyclerView(recyclerView);
+    }
+
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        mItemTouchHelper.startDrag(viewHolder);
+    }
+
 }

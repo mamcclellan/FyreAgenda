@@ -46,12 +46,7 @@ public class TaskEditFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
-            // Load the dummy name specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load name from a name provider.
             mItem = Task.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
-            //mItem.setDetails("new details");
-            Task.saveItem(mItem);
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
@@ -89,16 +84,16 @@ public class TaskEditFragment extends Fragment {
 
     public void saveData(){
         oldData = Task.cloneTask(mItem);
+        if(mItem.getTaskTypeValue()!=spinner.getSelectedItemPosition())
+            Task.moveItemToNewList(mItem, spinner.getSelectedItemPosition());
         mItem.setName(nameInput.getText().toString());
         mItem.setDetails(detailsInput.getText().toString());
         mItem.setTaskType(spinner.getSelectedItemPosition());
         Task.saveItem(mItem);
     }
     public void undoSaveData(){
-        if(mItem.getTaskType()!=oldData.getTaskType())
-            oldData.setTaskType(oldData.getTaskTypeValue());
-        mItem = oldData;
-        Task.saveItem(mItem);
+        Task.removeItem(mItem);
+        Task.addItemBack(oldData);
     }
     public static void hideKeyboard(Activity activity) {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);

@@ -10,6 +10,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 
+import org.mam.kch.fyreagenda.util.Task;
+
 /**
  * An activity representing a single Task detail screen. This
  * activity is only used narrow width devices. On tablet-size devices,
@@ -41,6 +43,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         // saved from previous configurations of this activity
         // (e.g. when rotating the screen from portrait to landscape).
         // In this case, the fragment will automatically be re-added
+        // In this case, the fragment automatically be re-added
         // to its container so we don't need to manually add it.
         // For more information, see the Fragments API guide at:
         //
@@ -67,7 +70,6 @@ public class TaskDetailActivity extends AppCompatActivity {
                         .commit();
             }
         }
-
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(
                 new View.OnClickListener() {

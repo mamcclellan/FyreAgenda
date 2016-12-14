@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.ActionMode;
@@ -12,42 +13,61 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import org.mam.kch.fyreagenda.util.OnStartDragListener;
+import org.mam.kch.fyreagenda.util.ItemTouchHelperAdapter;
+import org.mam.kch.fyreagenda.util.ItemTouchHelperViewHolder;
 import org.mam.kch.fyreagenda.util.Task;
 
+import java.util.Collections;
 import java.util.List;
 
-public class RecyclerAdapter
-        extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
+public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapter.ItemViewHolder>
+        implements ItemTouchHelperAdapter {
 
     private final List<Task.TaskItem> mValues;
     View selectedView;
     private Task.TaskItem selectedItem;
+    private Task.TaskItem clonedItem;
     ActionMode mActionMode;
     AppCompatActivity mainActivity;
+    private final OnStartDragListener mDragStartListener;
 
-    public RecyclerAdapter(List<Task.TaskItem> items, AppCompatActivity mainActivity) {
+    public RecyclerListAdapter(List<Task.TaskItem> items, AppCompatActivity mainActivity, Context context, OnStartDragListener dragStartListener) {
+        mDragStartListener = dragStartListener;
         mValues = items;
         this.mainActivity = mainActivity;
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.task_list_content, parent, false);
-        return new ViewHolder(view);
+        return new ItemViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ItemViewHolder holder, int position) {
         final int pos = position;
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(mValues.get(position).id);
         holder.mContentView.setText(mValues.get(position).getName());
+
+        // Start a drag whenever the handle view it touched
+        holder.handleView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
+                    mDragStartListener.onStartDrag(holder);
+                }
+                return false;
+            }
+        });
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,6 +101,7 @@ public class RecyclerAdapter
                         }
                         mActionMode = mainActivity.startActionMode(mActionModeCallback);
                         selectedItem = mValues.get(pos);
+                        clonedItem = Task.cloneTask(selectedItem);
                         selectedView = v;
                         v.setSelected(true);
                         v.setBackgroundColor(Color.argb(150, 0, 0, 255));
@@ -91,26 +112,52 @@ public class RecyclerAdapter
     }
 
     @Override
+    public void onItemDismiss(int position) {
+        mValues.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    @Override
+    public boolean onItemMove(int fromPosition, int toPosition) {
+        Collections.swap(mValues, fromPosition, toPosition);
+        Task.switchItemPositions(mValues, fromPosition, toPosition);
+        notifyItemMoved(fromPosition, toPosition);
+        return true;
+    }
+
+    @Override
     public int getItemCount() {
         return mValues.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ItemViewHolder extends RecyclerView.ViewHolder implements
+            ItemTouchHelperViewHolder {
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
         public Task.TaskItem mItem;
+        public final ImageView handleView;
 
-        public ViewHolder(View view) {
+        public ItemViewHolder(View view) {
             super(view);
             mView = view;
             mIdView = (TextView) view.findViewById(R.id.id);
             mContentView = (TextView) view.findViewById(R.id.content);
+            handleView = (ImageView) view.findViewById(R.id.handle);
         }
 
         @Override
         public String toString() {
             return super.toString() + " '" + mContentView.getText() + "'";
+        }
+        @Override
+        public void onItemSelected() {
+            itemView.setBackgroundColor(Color.LTGRAY);
+        }
+
+        @Override
+        public void onItemClear() {
+            itemView.setBackgroundColor(0);
         }
     }
 
@@ -135,19 +182,18 @@ public class RecyclerAdapter
         // Called when the user selects a contextual menu item
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            final int savedPosition;
             View v = mainActivity.findViewById(R.id.app_bar);
             switch (item.getItemId()) {
                 case R.id.delete:
-                    savedPosition = mValues.indexOf(selectedItem);
-                    Task.removeItem(selectedItem);
+                    Task.deleteItem(selectedItem);
                     ((TaskListActivity) mainActivity).refreshRecycleView();
                     Snackbar snackbar = Snackbar
                             .make(v, "Task deleted", Snackbar.LENGTH_LONG)
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    Task.addItemBack(selectedItem, savedPosition);
+                                    Task.addItemBack(clonedItem);
+                                    Task.saveItem(clonedItem);
                                     ((TaskListActivity) mainActivity).refreshRecycleView();
                                     Snackbar snackbar1 = Snackbar.make(view, "Task delete undone!", Snackbar.LENGTH_SHORT);
                                     snackbar1.show();
@@ -157,11 +203,7 @@ public class RecyclerAdapter
                     mode.finish(); // Action picked, so close the CAB
                     return true;
                 case R.id.archive:
-                    savedPosition = mValues.indexOf(selectedItem);
-                    final Task.TaskType savedType = selectedItem.getTaskType();
-                    Task.removeItem(selectedItem);
-                    selectedItem.setTaskType(Task.TaskType.ARCHIVED);
-                    Task.addItem(selectedItem);
+                    Task.archiveItem(selectedItem);
                     ((TaskListActivity) mainActivity).refreshRecycleView();
                     snackbar = Snackbar
                             .make(v, "Task archived", Snackbar.LENGTH_LONG)
@@ -169,11 +211,8 @@ public class RecyclerAdapter
                                 @Override
                                 public void onClick(View view) {
                                     Task.removeItem(selectedItem);
-                                    selectedItem.setTaskType(savedType);
-                                    // This is inefficient, so clean up when not so lazy
-                                    Task.addItemBack(selectedItem, savedPosition);
-                                    mValues.remove(selectedItem);
-                                    mValues.add(savedPosition, selectedItem);
+                                    Task.addItemBack(clonedItem);
+                                    Task.saveItem(clonedItem);
                                     ((TaskListActivity) mainActivity).refreshRecycleView();
                                     Snackbar snackbar1 = Snackbar.make(view, "Task archive undone!", Snackbar.LENGTH_SHORT);
                                     snackbar1.show();

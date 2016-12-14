@@ -1,35 +1,24 @@
 package org.mam.kch.fyreagenda;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.EditText;
 
 
 import org.mam.kch.fyreagenda.util.Task;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An activity representing a list of Tasks. This activity
@@ -98,7 +87,7 @@ public class TaskListActivity extends AppCompatActivity {
                                         //create a new TaskItem and assign the task type based on current view int. If archived view, sets to this week.
                                         newTask = Task.createTaskItem(result);
                                         newTask.setTaskType(viewPager.getCurrentItem());
-                                        Task.addItem(newTask);
+                                        Task.addNewItem(newTask);
                                         viewPager.getAdapter().notifyDataSetChanged();
                                         Snackbar snackbar = Snackbar
                                                 .make(view, "Task Added", Snackbar.LENGTH_LONG)
@@ -124,7 +113,7 @@ public class TaskListActivity extends AppCompatActivity {
                                         //create a new TaskItem and assign the task type based on current view int. If archived view, sets to this week.
                                         newTask = Task.createTaskItem(result);
                                         newTask.setTaskType(viewPager.getCurrentItem());
-                                        Task.addItem(newTask);
+                                        Task.addNewItem(newTask);
                                         viewPager.getAdapter().notifyDataSetChanged();
 
                                         // go to edit screen.

@@ -6,15 +6,15 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class Task {
 
-    public enum TaskType {THISWEEK(0, "This Week"), NEXTWEEK(1, "Next Week"), THISMONTH(2, "This Month"), ARCHIVED(3, "Archived");
+    public enum TaskType {THISWEEK(0, "This Week"), NEXTWEEK(1, "Next Week"), THISMONTH(2, "This Month"), ARCHIVED(3, "Archived"), DELETED(4, "Deleted");
         private int value;
         private String name;
         TaskType(int value, String name){
@@ -29,13 +29,13 @@ public class Task {
         }
     }
 
-    public static final ArrayList<TaskItem> THISWEEK = new ArrayList<TaskItem>();
-    public static final ArrayList<TaskItem> NEXTWEEK = new ArrayList<TaskItem>();
-    public static final ArrayList<TaskItem> THISMONTH = new ArrayList<TaskItem>();
-    public static final ArrayList<TaskItem> ARCHIVE = new ArrayList<TaskItem>();
+    public static final ArrayList<TaskItem> THISWEEK = new ArrayList<>();
+    public static final ArrayList<TaskItem> NEXTWEEK = new ArrayList<>();
+    public static final ArrayList<TaskItem> THISMONTH = new ArrayList<>();
+    public static final ArrayList<TaskItem> ARCHIVE = new ArrayList<>();
     private static DatabaseHandler database;
 
-    public static final Map<String, TaskItem> ITEM_MAP = new HashMap<String, TaskItem>();
+    public static final Map<String, TaskItem> ITEM_MAP = new HashMap<>();
 
 
     public static ArrayList<Task.TaskItem> getList(int i){
@@ -61,25 +61,25 @@ public class Task {
                 COUNT++;
                 TaskItem item = new TaskItem("This Week " + COUNT,
                         makeDetails(), TaskType.THISWEEK);
-                addItem(item);
+                addNewItem(item);
             }
             for (int i = 1; i <= 5; i++) {
                 COUNT++;
                 TaskItem item = new TaskItem("Next Week " + COUNT,
                         makeDetails(), TaskType.NEXTWEEK);
-                addItem(item);
+                addNewItem(item);
             }
             for (int i = 1; i <= 5; i++) {
                 COUNT++;
                 TaskItem item = new TaskItem("This month " + COUNT,
                         makeDetails(), TaskType.THISMONTH);
-                addItem(item);
+                addNewItem(item);
             }
             for (int i = 1; i <= 5; i++) {
                 COUNT++;
                 TaskItem item = new TaskItem("ARCHIVE " + COUNT,
                         makeDetails(), TaskType.ARCHIVED);
-                addItem(item);
+                addNewItem(item);
             }
         }
 
@@ -93,14 +93,70 @@ public class Task {
         Collections.sort(Task.ARCHIVE);
     }
 
-    public static void addItemBack(TaskItem item, int position) {
-        item.setListPosition(position);
-        database.addTask(item);
-        ITEM_MAP.put(String.valueOf(item.id), item);
-        Task.getList(item.getTaskTypeValue()).add(position, item);
+    public static void addItemBack(TaskItem item) {
+        Task.getList(item.getTaskTypeValue()).add(item.getListPosition(), item);
+        Task.updatePositions(item.getTaskType());
     }
 
-    public static void addItem(TaskItem item) {
+    public static void moveItemToNewList(TaskItem item, TaskType taskType){
+        if(item.getTaskType() == taskType)
+            return;
+        ArrayList<TaskItem> list = Task.getList(taskType.getValue());
+        Task.getList(item.getTaskTypeValue()).remove(item);
+        Task.updatePositions(item.getTaskType());
+        item.setTaskType(taskType);
+        item.setListPosition(list.size());
+        list.add(item);
+        Task.updatePositions(taskType);
+    }
+    public static void moveItemToNewList(TaskItem item, int taskTypeValue){
+        TaskType taskType;
+        switch (taskTypeValue) {
+            case 0:
+                taskType = TaskType.THISWEEK;
+                break;
+            case 1:
+                taskType = TaskType.NEXTWEEK;
+                break;
+            case 2:
+                taskType = TaskType.THISMONTH;
+                break;
+            case 3:
+                taskType = TaskType.ARCHIVED;
+                break;
+            case 4:
+                taskType = TaskType.DELETED;
+                break;
+            default:
+                taskType = TaskType.ARCHIVED;
+        }
+        moveItemToNewList(item, taskType);
+    }
+    public static void archiveItem(TaskItem item){
+        ArrayList<Task.TaskItem> list = Task.getList(item.getTaskType().getValue());
+        list.remove(item);
+        Task.updatePositions(item.getTaskType());
+        item.setCompletionTime(System.currentTimeMillis());
+        item.setTaskComplete(true);
+        item.setTaskType(TaskType.ARCHIVED);
+        item.setListPosition(Task.ARCHIVE.size());
+        Task.ARCHIVE.add(item);
+        Task.updatePositions(TaskType.ARCHIVED);
+    }
+
+    public static void updatePositions(TaskType taskType){
+        // Any time an item is moved from or to a list, this should be called on the list.
+        ArrayList<TaskItem>list = Task.getList(taskType.getValue());
+        for(TaskItem item: list){
+            item.setListPosition(list.indexOf(item));
+            ITEM_MAP.put(item.getID(),item);
+            database.updateTask(item);
+        }
+    }
+
+
+
+    public static void addNewItem(TaskItem item) {
         item.setListPosition(Task.getList(item.getTaskType().getValue()).size());
         database.addTask(item);
         ITEM_MAP.put(String.valueOf(item.id), item);
@@ -112,53 +168,50 @@ public class Task {
         Task.getList(item.getTaskType().getValue()).add(item);
     }
 
+    public static void switchItemPositions(List<TaskItem> mItems, int fromPosition, int toPosition){
+        TaskItem first = mItems.get(fromPosition);
+        TaskItem second = mItems.get(toPosition);
+        first.setListPosition(toPosition);
+        second.setListPosition(fromPosition);
+        Task.updatePositions(first.getTaskType());
+    }
+
+
+
     public static void removeItem(TaskItem item) {
         ArrayList<Task.TaskItem> list = Task.getList(item.getTaskType().getValue());
         list.remove(item);
+        Task.updatePositions(item.getTaskType());
+        item.setTaskType(TaskType.DELETED);
+        ITEM_MAP.put(item.getID(),item);
         database.deleteTask(item);
     }
 
-    private static void updateItemListing(TaskItem item){
-        // checks to see if in same list, if so updates that entry
-        for(int i = 0;i< Task.getList(item.getTaskTypeValue()).size(); i++) {
-            if (Task.getList(item.getTaskTypeValue()).get(i).id.equals(item.id)) {
-                Task.getList(item.getTaskTypeValue()).set(i,item);
-                ITEM_MAP.put(String.valueOf(item.id), item);
-                //database.updateTask(item);
-                return;
-            }
-        }
-        // else, removes item from all lists and adds item back in at end of list specified by item
-        Task.removeItem(item);
-        Task.addItem(item);
-        //database.addTask(item);
+    public static void deleteItem(TaskItem item) {
+        ArrayList<Task.TaskItem> list = Task.getList(item.getTaskType().getValue());
+        list.remove(item);
+        Task.updatePositions(item.getTaskType());
+        ITEM_MAP.remove(item.getID());
+        database.deleteTask(item);
     }
 
     public static void saveItem(TaskItem item){
-        if(item.isNewTaskType()) {
-            removeItem(ITEM_MAP.get(item.id));
-            item.saved();
-            if(item.getTaskType() == TaskType.ARCHIVED)
-                item.setEdited(true);
-            item.setCompletionTime(System.currentTimeMillis());
-            item.setTaskComplete(true);
-            addItem(item);
-        }
-        else if(item.isEdited()) {
-            item.saved();
+        if(item.getTaskType() == TaskType.ARCHIVED)
+            Task.archiveItem(item);
+        else {
             database.updateTask(item);
-            updateItemListing(item);
+            ITEM_MAP.put(item.getID(), item);
         }
     }
 
     // Creates a clone of item and returns it. Does not increase TaskItem count (Task.COUNT)
     public static TaskItem cloneTask(TaskItem item){
         Task.TaskItem clone = new Task.TaskItem(item.name, item.details,item.taskType);
+        clone.id = item.id;
+        clone.setListPosition(item.getListPosition());
         clone.creationTime = item.creationTime;
         clone.completionTime = item.completionTime;
         clone.taskComplete = item.taskComplete;
-        clone.edited = true;
-        clone.newTaskType = item.newTaskType;
         return clone;
     }
 
@@ -188,8 +241,6 @@ public class Task {
         private long completionTime;
         private TaskType taskType;
         private boolean taskComplete;
-        private boolean edited;
-        private boolean newTaskType;
         private int listPosition;
 
         TaskItem() {
@@ -203,8 +254,6 @@ public class Task {
             this.creationTime = System.currentTimeMillis();
             this.completionTime = 0;
             this.taskComplete = false;
-            this.edited = false;
-            this.newTaskType = false;
         }
 
         String getID() {
@@ -233,7 +282,6 @@ public class Task {
 
 
         public void setDetails(String details) {
-            this.edited = true;
             this.details = details;
         }
 
@@ -242,17 +290,11 @@ public class Task {
         }
 
         public void setTaskType(TaskType taskType) {
-            if(this.taskType != taskType){
-                this.edited = true;
-                this.newTaskType = true;
-            }
             this.taskType = taskType;
         }
 
         public void setTaskType(int i){
             if(this.taskType.value != i){
-                this.edited = true;
-                this.newTaskType = true;
                 if(i == 0)
                     this.taskType = TaskType.THISWEEK;
                 if(i == 1)
@@ -285,22 +327,6 @@ public class Task {
             this.creationTime = creationTime;
         }
 
-        boolean isEdited() {
-            return this.edited;
-        }
-
-        void setEdited(boolean edited) {
-            this.edited = edited;
-        }
-
-        boolean isNewTaskType() {
-            return this.newTaskType;
-        }
-
-        void setNewTaskType(boolean newTaskType) {
-            this.newTaskType = newTaskType;
-        }
-
         public int getListPosition() {
             return listPosition;
         }
@@ -308,10 +334,6 @@ public class Task {
         public void setListPosition(int listPosition) {
             this.listPosition = listPosition;
         }
-
-        private void saved(){
-            this.newTaskType = false;
-            this.edited = false;}
 
         @Override
         public String toString() {
@@ -329,14 +351,16 @@ public class Task {
             this.details = source.readString();
             int typeIndex = source.readInt();
             switch (typeIndex) {
-                case 1:
+                case 0:
                     this.taskType = TaskType.THISWEEK;
-                case 2:
+                case 1:
                     this.taskType = TaskType.NEXTWEEK;
-                case 3:
+                case 2:
                     this.taskType = TaskType.THISMONTH;
-                case 4:
+                case 3:
                     this.taskType = TaskType.ARCHIVED;
+                case 4:
+                    this.taskType = TaskType.DELETED;
             }
             this.creationTime = source.readLong();
             this.completionTime = source.readLong();
