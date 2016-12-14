@@ -63,13 +63,25 @@ public class TaskDetailFragment extends Fragment {
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
                 appBarLayout.setTitle(mItem.getName());}
-            ((TextView) rootView.findViewById(R.id.task_details)).setText(mItem.getDetails());
+
+            ((TextView) rootView.findViewById(R.id.task_Details)).setText(mItem.getDetails());
+            if(mItem.getDetails().equals("")) {
+                rootView.findViewById(R.id.task_Details).setVisibility(View.GONE);
+            }
+            else {
+                rootView.findViewById(R.id.task_Details).setVisibility(View.VISIBLE);
+            }
+            ((TextView) rootView.findViewById(R.id.task_Details)).setText(mItem.getDetails());
             ((TextView) rootView.findViewById(R.id.task_TaskType)).setText("Current list: " + mItem.getTaskType().getName());
             ((TextView) rootView.findViewById(R.id.task_CreationTime)).setText("Creation time: " + new Date(mItem.getCreationTime()).toString());
-            if(mItem.getTaskType() == Task.TaskType.ARCHIVED)
+            if(mItem.getTaskType() == Task.TaskType.ARCHIVED) {
                 ((TextView) rootView.findViewById(R.id.task_CompletionTime)).setText("Completion time: " + new Date(mItem.getCreationTime()).toString());
-            else
+                rootView.findViewById(R.id.task_CreationTime).setVisibility(View.VISIBLE);
+            }
+            else {
                 ((TextView) rootView.findViewById(R.id.task_CompletionTime)).setText("Completion time: Not Complete");
+                rootView.findViewById(R.id.task_CompletionTime).setVisibility(View.GONE);
+            }
 
 
         }

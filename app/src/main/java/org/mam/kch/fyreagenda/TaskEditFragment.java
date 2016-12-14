@@ -75,6 +75,12 @@ public class TaskEditFragment extends Fragment {
         // Show the dummy name as text in a TextView.
         if (mItem != null) {
             ((TextView) rootView.findViewById(R.id.edit_detail)).setText(mItem.getDetails());
+            if(mItem.getDetails().equals("")) {
+                rootView.findViewById(R.id.edit_detail).setVisibility(View.GONE);
+            }
+            else {
+                rootView.findViewById(R.id.edit_detail).setVisibility(View.VISIBLE);
+            }
             nameInput.setText(mItem.getName());
             detailsInput.setText(mItem.getDetails());
         }

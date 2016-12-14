@@ -235,10 +235,10 @@ public class Task {
     public static TaskItem createTaskItem(String name) {
         if(name.equals("")){
             return new TaskItem("New Item",
-                    makeDetails(), TaskType.THISWEEK);
+                    "", TaskType.THISWEEK);
         }
         return new TaskItem(name,
-                "No details set.", TaskType.THISWEEK);
+                "", TaskType.THISWEEK);
     }
 
     private static String makeDetails() {
