@@ -24,6 +24,7 @@ import org.mam.kch.fyreagenda.util.ItemTouchHelperAdapter;
 import org.mam.kch.fyreagenda.util.ItemTouchHelperViewHolder;
 import org.mam.kch.fyreagenda.util.Task;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,8 +34,12 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
     private final List<Task.TaskItem> mValues;
     View selectedView;
     private Task.TaskItem selectedItem;
-    private Task.TaskItem clonedItem;
+    private List<Task.TaskItem> selectedItems = new ArrayList<>();
+    private List<Task.TaskItem> clonedItems = new ArrayList<>();
+    private List<View> selectedViews = new ArrayList<>();
     ActionMode mActionMode;
+    Menu actionModeMenu;
+    boolean inActionMode = false;
     AppCompatActivity mainActivity;
     private final OnStartDragListener mDragStartListener;
 
@@ -72,21 +77,54 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (TaskListActivity.isTwoPane()) {
-                    Bundle arguments = new Bundle();
-                    arguments.putString(TaskDetailFragment.ARG_ITEM_ID, holder.mItem.id);
-                    TaskDetailFragment fragment = new TaskDetailFragment();
-                    fragment.setArguments(arguments);
-                    // Below -- figure out how to incorporate this
-                    //getSupportFragmentManager().beginTransaction()
-                    //.replace(R.id.task_detail_container, fragment)
-                    //.commit();
-                } else {
-                    Context context = v.getContext();
-                    Intent intent = new Intent(context, TaskDetailActivity.class);
-                    intent.putExtra(TaskDetailFragment.ARG_ITEM_ID, holder.mItem.id);
+                if (!inActionMode) {
+                    if (TaskListActivity.isTwoPane()) {
+                        Bundle arguments = new Bundle();
+                        arguments.putString(TaskDetailFragment.ARG_ITEM_ID, holder.mItem.id);
+                        TaskDetailFragment fragment = new TaskDetailFragment();
+                        fragment.setArguments(arguments);
+                        // Below -- figured out
+                        mainActivity.getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.task_detail_container, fragment)
+                        .commit();
+                    } else {
+                        Context context = v.getContext();
+                        Intent intent = new Intent(context, TaskDetailActivity.class);
+                        intent.putExtra(TaskDetailFragment.ARG_ITEM_ID, holder.mItem.id);
 
-                    context.startActivity(intent);
+                        context.startActivity(intent);
+                    }
+                } else {
+                    selectedItem = mValues.get(pos);
+                    if (selectedItems.contains(selectedItem)) {
+                        v.setBackgroundColor(Color.TRANSPARENT);
+                        selectedViews.remove(v);
+                        selectedItems.remove(selectedItem);
+                        if (selectedItems.size() == 0) {
+                            for (int i = 0; i < actionModeMenu.size(); i++) {
+                                MenuItem item = actionModeMenu.getItem(i);
+                                item.setVisible(false);
+                            }
+                        }
+                        List<Task.TaskItem> removeList = new ArrayList<Task.TaskItem>();
+                        for (Task.TaskItem task: clonedItems) {
+                            if (selectedItem.id.equals(task.id)) removeList.add(task);
+                        }
+                        for (Task.TaskItem task: removeList) {
+                            clonedItems.remove(task);
+                        }
+                    } else {
+                        if (selectedItems.size() == 0) {
+                            for (int i = 0; i < actionModeMenu.size(); i++) {
+                                MenuItem item = actionModeMenu.getItem(i);
+                                item.setVisible(true);
+                            }
+                        }
+                        v.setBackgroundColor(Color.argb(150, 0, 0, 255));
+                        selectedItems.add(selectedItem);
+                        clonedItems.add(Task.cloneTask(selectedItem));
+                        selectedViews.add(v);
+                    }
                 }
             }
         });
@@ -99,10 +137,14 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                         if (mActionMode != null) {
                             return false;
                         }
+                        inActionMode = true;
+                        clonedItems.clear();
                         mActionMode = mainActivity.startActionMode(mActionModeCallback);
                         selectedItem = mValues.get(pos);
-                        clonedItem = Task.cloneTask(selectedItem);
+                        selectedItems.add(mValues.get(pos));
+                        clonedItems.add(Task.cloneTask(selectedItem));
                         selectedView = v;
+                        selectedViews.add(v);
                         v.setSelected(true);
                         v.setBackgroundColor(Color.argb(150, 0, 0, 255));
                         return true;
@@ -119,11 +161,14 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
-        Collections.swap(mValues, fromPosition, toPosition);
-        Task.updatePositions(mValues.get(0).getTaskType());
-        //Task.switchItemPositions(mValues, fromPosition, toPosition);
-        notifyItemMoved(fromPosition, toPosition);
-        return true;
+        if (!inActionMode) {
+            Collections.swap(mValues, fromPosition, toPosition);
+            Task.updatePositions(mValues.get(0).getTaskType());
+            //Task.switchItemPositions(mValues, fromPosition, toPosition);
+            notifyItemMoved(fromPosition, toPosition);
+            return true;
+        }
+        else return false;
     }
 
     @Override
@@ -170,6 +215,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             // Inflate a menu resource providing context menu items
             MenuInflater inflater = mode.getMenuInflater();
+            actionModeMenu = menu;
             inflater.inflate(R.menu.list_context_menu, menu);
             if (mValues.size() > 0 && mValues.get(0).getTaskType() == Task.TaskType.ARCHIVED) {
                 menu.removeItem(R.id.archive);
@@ -188,19 +234,28 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             View v = mainActivity.findViewById(R.id.app_bar);
+            Collections.sort(clonedItems); // Important!
             switch (item.getItemId()) {
                 case R.id.delete:
-                    Task.deleteItem(selectedItem);
+                    for (Task.TaskItem task: selectedItems) {
+                        Task.deleteItem(task);
+                    }
                     ((TaskListActivity) mainActivity).refreshRecycleView();
+                    String deleteMessage;
+                    if (selectedItems.size() > 1) deleteMessage = "Tasks deleted";
+                    else deleteMessage = "Task deleted";
                     Snackbar snackbar = Snackbar
-                            .make(v, "Task deleted", Snackbar.LENGTH_LONG)
+                            .make(v, deleteMessage, Snackbar.LENGTH_LONG)
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    Task.addItemBack(clonedItem);
-                                    Task.saveItem(clonedItem);
+                                    for (Task.TaskItem task: clonedItems) {
+                                        Task.addItemBack(task);
+                                        Task.saveItem(task);
+                                    }
+                                    clonedItems.clear();
                                     ((TaskListActivity) mainActivity).refreshRecycleView();
-                                    Snackbar snackbar1 = Snackbar.make(view, "Task delete undone!", Snackbar.LENGTH_SHORT);
+                                    Snackbar snackbar1 = Snackbar.make(view, "Delete undone!", Snackbar.LENGTH_SHORT);
                                     snackbar1.show();
                                 }
                             });
@@ -208,18 +263,28 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                     mode.finish(); // Action picked, so close the CAB
                     return true;
                 case R.id.archive:
-                    Task.archiveItem(selectedItem);
+                    for (Task.TaskItem task: selectedItems) {
+                        Task.archiveItem(task);
+                    }
                     ((TaskListActivity) mainActivity).refreshRecycleView();
+                    String archiveMessage;
+                    if (selectedItems.size() > 1) archiveMessage = "Tasks archived";
+                    else archiveMessage = "Task archived";
                     snackbar = Snackbar
-                            .make(v, "Task archived", Snackbar.LENGTH_LONG)
+                            .make(v, archiveMessage, Snackbar.LENGTH_LONG)
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    Task.removeItem(selectedItem);
-                                    Task.addItemBack(clonedItem);
-                                    Task.saveItem(clonedItem);
+                                    for (Task.TaskItem task: selectedItems) {
+                                        Task.removeItem(task);
+                                    }
+                                    for (Task.TaskItem task: clonedItems) {
+                                        Task.addItemBack(task);
+                                        Task.saveItem(task);
+                                    }
+                                    clonedItems.clear();
                                     ((TaskListActivity) mainActivity).refreshRecycleView();
-                                    Snackbar snackbar1 = Snackbar.make(view, "Task archive undone!", Snackbar.LENGTH_SHORT);
+                                    Snackbar snackbar1 = Snackbar.make(view, "Archive undone!", Snackbar.LENGTH_SHORT);
                                     snackbar1.show();
                                 }
                             });
@@ -234,7 +299,11 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         // Called when the user exits the action mode
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            selectedView.setBackgroundColor(Color.TRANSPARENT);
+            inActionMode = false;
+            for (View view: selectedViews) {
+                view.setBackgroundColor(Color.TRANSPARENT);
+            }
+            selectedItems.clear();
             mActionMode = null;
         }
     };
