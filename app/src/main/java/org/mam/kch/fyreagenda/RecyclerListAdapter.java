@@ -100,12 +100,6 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                         v.setBackgroundColor(Color.TRANSPARENT);
                         selectedViews.remove(v);
                         selectedItems.remove(selectedItem);
-                        if (selectedItems.size() == 0) {
-                            for (int i = 0; i < actionModeMenu.size(); i++) {
-                                MenuItem item = actionModeMenu.getItem(i);
-                                item.setVisible(false);
-                            }
-                        }
                         List<Task.TaskItem> removeList = new ArrayList<Task.TaskItem>();
                         for (Task.TaskItem task: clonedItems) {
                             if (selectedItem.id.equals(task.id)) removeList.add(task);
@@ -113,13 +107,12 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                         for (Task.TaskItem task: removeList) {
                             clonedItems.remove(task);
                         }
-                    } else {
                         if (selectedItems.size() == 0) {
-                            for (int i = 0; i < actionModeMenu.size(); i++) {
-                                MenuItem item = actionModeMenu.getItem(i);
-                                item.setVisible(true);
+                            if (mActionMode != null) {
+                                mActionMode.finish();
                             }
                         }
+                    } else {
                         v.setBackgroundColor(Color.argb(150, 0, 0, 255));
                         selectedItems.add(selectedItem);
                         clonedItems.add(Task.cloneTask(selectedItem));
@@ -216,6 +209,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
             // Inflate a menu resource providing context menu items
             MenuInflater inflater = mode.getMenuInflater();
             actionModeMenu = menu;
+            mActionMode = mode;
             inflater.inflate(R.menu.list_context_menu, menu);
             if (mValues.size() > 0 && mValues.get(0).getTaskType() == Task.TaskType.ARCHIVED) {
                 menu.removeItem(R.id.archive);
