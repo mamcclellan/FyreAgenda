@@ -137,6 +137,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                         }
                         inActionMode = true;
                         clonedItems.clear();
+                        selectedItems.clear();
                         mActionMode = mainActivity.startActionMode(mActionModeCallback);
                         selectedItem = mValues.get(pos);
                         selectedItems.add(mValues.get(pos));
@@ -155,7 +156,8 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                     @Override
                     public void onClick(View v) {
                         selectedItem = mValues.get(pos);
-                        selectedItem.setTaskComplete(holder.mCheckbox.isChecked());
+                        if (holder.mCheckbox.isChecked()) selectedItem.completeTask();
+                        else selectedItem.restartTask();
                         // need to set the item to be strike-through or greyed out or something...
                         /*selectedView = v.findViewById(R.id.content);
                         selectedView.setSelected(true);
@@ -216,7 +218,9 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
 
         @Override
         public void onItemClear() {
-            itemView.setBackgroundColor(0);
+            if (inActionMode && selectedItems.contains(mItem))
+                itemView.setBackgroundColor(Color.argb(150, 0, 0, 255));
+            else itemView.setBackgroundColor(0);
             notifyDataSetChanged();
         }
     }
@@ -317,7 +321,6 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
             for (View view: selectedViews) {
                 view.setBackgroundColor(Color.TRANSPARENT);
             }
-            selectedItems.clear();
             mActionMode = null;
         }
     };

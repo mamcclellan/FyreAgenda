@@ -87,7 +87,7 @@ public class TaskEditFragment extends Fragment {
             Task.moveItemToNewList(mItem, spinner.getSelectedItemPosition());
         mItem.setName(nameInput.getText().toString());
         mItem.setDetails(detailsInput.getText().toString());
-        mItem.setTaskComplete(false);
+        mItem.restartTask();
         mItem.setTaskType(spinner.getSelectedItemPosition());
         Task.saveItem(mItem);
     }
