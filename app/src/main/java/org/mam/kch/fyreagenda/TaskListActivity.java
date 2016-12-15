@@ -41,6 +41,13 @@ public class TaskListActivity extends AppCompatActivity {
     private String result;
 
     @Override
+    public void onSaveInstanceState(Bundle savedState) {
+        super.onSaveInstanceState(savedState);
+
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Task.loadTasks(getApplicationContext());
@@ -61,93 +68,7 @@ public class TaskListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                // get prompts.xml view
-                LayoutInflater li = LayoutInflater.from(context);
-                View promptsView = li.inflate(R.layout.new_task_prompt, null);
-
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                        context);
-
-                // set prompts.xml to alertdialog builder
-                alertDialogBuilder.setView(promptsView);
-
-                final EditText userInput = (EditText) promptsView
-                        .findViewById(R.id.editTextDialogUserInput);
-
-                // set dialog message
-                alertDialogBuilder
-                        .setCancelable(false)
-                        .setPositiveButton("OK",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
-                                        // get user input and set it to result
-                                        // edit text
-                                        result =userInput.getText().toString();
-                                        final Task.TaskItem newTask;
-                                        //create a new TaskItem and assign the task type based on current view int. If archived view, sets to this week.
-                                        newTask = Task.createTaskItem(result);
-                                        newTask.setTaskType(viewPager.getCurrentItem());
-                                        Task.addNewItem(newTask);
-                                        viewPager.getAdapter().notifyDataSetChanged();
-                                        Snackbar snackbar = Snackbar
-                                                .make(view, "Task Added", Snackbar.LENGTH_LONG)
-                                                .setAction("UNDO", new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View view) {
-                                                        Task.removeItem(newTask);
-                                                        viewPager.getAdapter().notifyDataSetChanged();
-                                                        Snackbar snackbar1 = Snackbar.make(view, "Task is deleted!", Snackbar.LENGTH_SHORT);
-                                                        snackbar1.show();
-                                                    }
-                                                });
-                                        snackbar.show();
-                                    }
-                                })
-                        .setNeutralButton("EDIT",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
-                                        // get user input and set it to result
-                                        // edit text
-                                        result =userInput.getText().toString();
-                                        final Task.TaskItem newTask;
-                                        //create a new TaskItem and assign the task type based on current view int. If archived view, sets to this week.
-                                        newTask = Task.createTaskItem(result);
-                                        newTask.setTaskType(viewPager.getCurrentItem());
-                                        Task.addNewItem(newTask);
-                                        viewPager.getAdapter().notifyDataSetChanged();
-
-                                        // go to edit screen.
-
-                                        if (TaskListActivity.isTwoPane()) {
-                                            Bundle arguments = new Bundle();
-                                            arguments.putString(TaskEditFragment.ARG_ITEM_ID, newTask.id);
-                                            TaskEditFragment fragment = new TaskEditFragment();
-                                            fragment.setArguments(arguments);
-                                            // Below -- figure out how to incorporate this
-                                            //getSupportFragmentManager().beginTransaction()
-                                            //.replace(R.id.task_detail_container, fragment)
-                                            //.commit();
-                                        } else {
-                                            Context context = view.getContext();
-                                            Intent intent = new Intent(context, TaskDetailActivity.class);
-                                            intent.putExtra(TaskEditFragment.ARG_ITEM_ID, newTask.id);
-                                            intent.putExtra("EditMode", true);
-                                            context.startActivity(intent);
-                                        }
-                                    }
-                                })
-                        .setNegativeButton("Cancel",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-
-                // create alert dialog
-                AlertDialog alertDialog = alertDialogBuilder.create();
-
-                // show it
-                alertDialog.show();
+                fabClicked(view);
             }
         });
 
@@ -161,6 +82,95 @@ public class TaskListActivity extends AppCompatActivity {
         }
     }
 
+    public void fabClicked(final View view){
+        // get prompts.xml view
+        LayoutInflater li = LayoutInflater.from(context);
+        View promptsView = li.inflate(R.layout.new_task_prompt, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                context);
+
+        // set prompts.xml to alertdialog builder
+        alertDialogBuilder.setView(promptsView);
+
+        final EditText userInput = (EditText) promptsView
+                .findViewById(R.id.editTextDialogUserInput);
+
+        // set dialog message
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                // get user input and set it to result
+                                // edit text
+                                result =userInput.getText().toString();
+                                final Task.TaskItem newTask;
+                                //create a new TaskItem and assign the task type based on current view int. If archived view, sets to this week.
+                                newTask = Task.createTaskItem(result);
+                                newTask.setTaskType(viewPager.getCurrentItem());
+                                Task.addNewItem(newTask);
+                                viewPager.getAdapter().notifyDataSetChanged();
+                                Snackbar snackbar = Snackbar
+                                        .make(view, "Task Added", Snackbar.LENGTH_LONG)
+                                        .setAction("UNDO", new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                Task.removeItem(newTask);
+                                                viewPager.getAdapter().notifyDataSetChanged();
+                                                Snackbar snackbar1 = Snackbar.make(view, "Task is deleted!", Snackbar.LENGTH_SHORT);
+                                                snackbar1.show();
+                                            }
+                                        });
+                                snackbar.show();
+                            }
+                        })
+                .setNeutralButton("EDIT",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                // get user input and set it to result
+                                // edit text
+                                result =userInput.getText().toString();
+                                final Task.TaskItem newTask;
+                                //create a new TaskItem and assign the task type based on current view int. If archived view, sets to this week.
+                                newTask = Task.createTaskItem(result);
+                                newTask.setTaskType(viewPager.getCurrentItem());
+                                Task.addNewItem(newTask);
+                                viewPager.getAdapter().notifyDataSetChanged();
+
+                                // go to edit screen.
+
+                                if (TaskListActivity.isTwoPane()) {
+                                    Bundle arguments = new Bundle();
+                                    arguments.putString(TaskEditFragment.ARG_ITEM_ID, newTask.id);
+                                    TaskEditFragment fragment = new TaskEditFragment();
+                                    fragment.setArguments(arguments);
+                                    // Below -- figure out how to incorporate this
+                                    //getSupportFragmentManager().beginTransaction()
+                                    //.replace(R.id.task_detail_container, fragment)
+                                    //.commit();
+                                } else {
+                                    Context context = view.getContext();
+                                    Intent intent = new Intent(context, TaskDetailActivity.class);
+                                    intent.putExtra(TaskEditFragment.ARG_ITEM_ID, newTask.id);
+                                    intent.putExtra("EditMode", true);
+                                    context.startActivity(intent);
+                                }
+                            }
+                        })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
+    }
     @Override
     public void onStart() {
         // Set correct tab on ViewPager
