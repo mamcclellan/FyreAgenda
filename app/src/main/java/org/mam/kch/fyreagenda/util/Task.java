@@ -149,7 +149,6 @@ public class Task {
             list.remove(item);
             Task.updatePositions(item.getTaskType());
         }
-        item.setCompletionTime(System.currentTimeMillis());
         item.setTaskComplete(true);
         item.setTaskType(TaskType.ARCHIVED);
         item.setListPosition(Task.ARCHIVE.size());
@@ -314,14 +313,18 @@ public class Task {
 
         public void setTaskComplete(boolean taskComplete) {
             this.taskComplete = taskComplete;
+            if(taskComplete)
+                this.completionTime = System.currentTimeMillis();
+            else
+                this.completionTime = 0;
         }
 
         public long getCompletionTime() {
             return this.completionTime;
         }
 
-        void setCompletionTime(long completionTime) {
-            this.completionTime = completionTime;
+        void setCompletionTime(long creationTime) {
+            this.creationTime = creationTime;
         }
 
         public long getCreationTime() {

@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -60,8 +61,12 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
     public void onBindViewHolder(final ItemViewHolder holder, int position) {
         final int pos = position;
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
+        holder.mCheckbox.setChecked(mValues.get(position).getTaskComplete());
         holder.mContentView.setText(mValues.get(position).getName());
+        // need to set strick-thorogh or greyed out background or something.
+        // this is not working...
+        if(mValues.get(position).getTaskComplete())
+            holder.mContentView.setBackgroundColor(111111);
 
         // Start a drag whenever the handle view it touched
         holder.handleView.setOnTouchListener(new View.OnTouchListener() {
@@ -144,6 +149,22 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                     }
                 }
         );
+
+        holder.mCheckbox.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        selectedItem = mValues.get(pos);
+                        selectedItem.setTaskComplete(holder.mCheckbox.isChecked());
+                        // need to set the item to be strike-through or greyed out or something...
+                        /*selectedView = v.findViewById(R.id.content);
+                        selectedView.setSelected(true);
+                        selectedView.setBackgroundColor(Color.argb(150, 0, 0, 255));*/
+                        Task.saveItem(selectedItem);
+                    }
+                }
+        );
+
     }
 
     @Override
@@ -157,7 +178,6 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         if (!inActionMode) {
             Collections.swap(mValues, fromPosition, toPosition);
             Task.updatePositions(mValues.get(0).getTaskType());
-            //Task.switchItemPositions(mValues, fromPosition, toPosition);
             notifyItemMoved(fromPosition, toPosition);
             return true;
         }
@@ -172,17 +192,17 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
     public class ItemViewHolder extends RecyclerView.ViewHolder implements
             ItemTouchHelperViewHolder {
         public final View mView;
-        public final TextView mIdView;
         public final TextView mContentView;
+        public final CheckBox mCheckbox;
         public Task.TaskItem mItem;
         public final ImageView handleView;
 
         public ItemViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
             handleView = (ImageView) view.findViewById(R.id.handle);
+            mContentView = (TextView) view.findViewById(R.id.content);
+            mCheckbox = (CheckBox) view.findViewById(R.id.checkbox);
         }
 
         @Override

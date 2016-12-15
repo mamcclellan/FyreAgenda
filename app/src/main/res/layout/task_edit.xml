@@ -5,15 +5,6 @@
     android:layout_height="match_parent"
     android:stretchColumns="1"
     android:padding="16dp">
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/edit_detail"
-        style="?android:attr/textAppearanceLarge"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:textIsSelectable="true"
-        tools:context="org.mam.kch.fyreagenda.TaskEditFragment" />
 
     <TableRow>
         <TextView
@@ -24,7 +15,7 @@
             android:id="@+id/name_input"
             android:layout_column="1"
             android:inputType="textCapWords"
-            android:maxLength="20"
+            android:maxLength="32"
             android:hint="Enter Name..." />
     </TableRow>
     <TableRow>
