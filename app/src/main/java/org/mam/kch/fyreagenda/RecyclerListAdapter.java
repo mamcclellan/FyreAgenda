@@ -120,7 +120,8 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
         Collections.swap(mValues, fromPosition, toPosition);
-        Task.switchItemPositions(mValues, fromPosition, toPosition);
+        Task.updatePositions(mValues.get(0).getTaskType());
+        //Task.switchItemPositions(mValues, fromPosition, toPosition);
         notifyItemMoved(fromPosition, toPosition);
         return true;
     }
@@ -130,7 +131,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         return mValues.size();
     }
 
-    public static class ItemViewHolder extends RecyclerView.ViewHolder implements
+    public class ItemViewHolder extends RecyclerView.ViewHolder implements
             ItemTouchHelperViewHolder {
         public final View mView;
         public final TextView mIdView;
@@ -158,6 +159,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         @Override
         public void onItemClear() {
             itemView.setBackgroundColor(0);
+            notifyDataSetChanged();
         }
     }
 
@@ -169,6 +171,9 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
             // Inflate a menu resource providing context menu items
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.list_context_menu, menu);
+            if (mValues.size() > 0 && mValues.get(0).getTaskType() == Task.TaskType.ARCHIVED) {
+                menu.removeItem(R.id.archive);
+            }
             return true;
         }
 

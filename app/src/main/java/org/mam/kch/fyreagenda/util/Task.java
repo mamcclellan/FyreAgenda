@@ -143,8 +143,8 @@ public class Task {
         }
         moveItemToNewList(item, taskType);
     }
-    public static void archiveItem(TaskItem item){
-        if(Task.getList(item.getTaskTypeValue())!=null){
+    public static void archiveItem(TaskItem item) {
+        if(Task.getList(item.getTaskTypeValue())!=null) {
             ArrayList<Task.TaskItem> list = Task.getList(item.getTaskType().getValue());
             list.remove(item);
             Task.updatePositions(item.getTaskType());
@@ -157,7 +157,7 @@ public class Task {
         Task.updatePositions(TaskType.ARCHIVED);
     }
 
-    public static void updatePositions(TaskType taskType){
+    public static void updatePositions(TaskType taskType) {
         // Any time an item is moved from or to a list, this should be called on the list.
         ArrayList<TaskItem>list = Task.getList(taskType.getValue());
         for(TaskItem item: list){
@@ -167,8 +167,6 @@ public class Task {
         }
     }
 
-
-
     public static void addNewItem(TaskItem item) {
         item.setListPosition(Task.getList(item.getTaskType().getValue()).size());
         database.addTask(item);
@@ -177,24 +175,14 @@ public class Task {
     }
 
     public static void addItemFromDatabase(TaskItem item) {
-        if(Task.getList(item.getTaskTypeValue())!=null){
+        if(Task.getList(item.getTaskTypeValue())!=null) {
             Task.getList(item.getTaskTypeValue()).add(item);
         }
         ITEM_MAP.put(String.valueOf(item.id), item);
     }
 
-    public static void switchItemPositions(List<TaskItem> mItems, int fromPosition, int toPosition){
-        TaskItem first = mItems.get(fromPosition);
-        TaskItem second = mItems.get(toPosition);
-        first.setListPosition(toPosition);
-        second.setListPosition(fromPosition);
-        Task.updatePositions(first.getTaskType());
-    }
-
-
-
     public static void removeItem(TaskItem item) {
-        if(Task.getList(item.getTaskType().getValue())!=null){
+        if(Task.getList(item.getTaskType().getValue())!=null) {
             ArrayList<Task.TaskItem> list = Task.getList(item.getTaskType().getValue());
             list.remove(item);
             Task.updatePositions(item.getTaskType());
