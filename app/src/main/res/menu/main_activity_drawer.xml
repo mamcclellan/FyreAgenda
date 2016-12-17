@@ -13,6 +13,15 @@
             android:title="Notifications" />
 
         <item
+            android:id="@+id/nav_archive"
+            android:icon="@drawable/ic_archive_black_24dp"
+            android:title="Archived" />
+        <!--Need to find black delete icon.-->
+        <item
+            android:id="@+id/nav_deleted"
+            android:icon="@android:drawable/ic_menu_delete"
+            android:title="Deleted" />
+        <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings_black_24dp"
             android:title="Settings" />

@@ -167,10 +167,10 @@ public class Task {
     }
 
     public static void addNewItem(TaskItem item) {
-        item.setListPosition(Task.getList(item.getTaskType().getValue()).size());
+        Task.getList(item.getTaskType().getValue()).add(0,item);
         database.addTask(item);
         ITEM_MAP.put(String.valueOf(item.id), item);
-        Task.getList(item.getTaskType().getValue()).add(item);
+        Task.updatePositions(item.getTaskType());
     }
 
     public static void addItemFromDatabase(TaskItem item) {
