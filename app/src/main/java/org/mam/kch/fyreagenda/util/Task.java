@@ -108,15 +108,16 @@ public class Task {
     public static void moveItemToNewList(TaskItem item, TaskType taskType){
         if(item.getTaskType() == taskType)
             return;
-        ArrayList<TaskItem> list = Task.getList(taskType.getValue());
-        if(Task.getList(item.getTaskTypeValue())!=null) {
-            Task.getList(item.getTaskTypeValue()).remove(item);
+        ArrayList<TaskItem> listToPutItem = Task.getList(taskType.getValue());
+        ArrayList<TaskItem> listItemIsFrom = Task.getList(item.getTaskTypeValue());
+        if(listItemIsFrom!=null) {
+            listItemIsFrom.remove(item);
             Task.updatePositions(item.getTaskType());
         }
-        if(list != null) {
+        if(listToPutItem != null) {
             item.setTaskType(taskType);
-            item.setListPosition(list.size());
-            list.add(item);
+            item.setListPosition(listToPutItem.size());
+            listToPutItem.add(item);
             Task.updatePositions(taskType);
         }
     }
@@ -172,6 +173,38 @@ public class Task {
         ITEM_MAP.put(String.valueOf(item.id), item);
         Task.updatePositions(item.getTaskType());
     }
+
+    public static void moveCheckedTask(TaskItem item){
+        List<TaskItem> list = Task.getList(item.getTaskType().getValue());
+        if(item.getListPosition()==list.size()-1)
+            return;
+        int where = item.getListPosition();
+        list.remove(item);
+        while(!list.get(where).getTaskComplete()){
+            where++;
+            if(where>=list.size())
+                break;
+        }
+        list.add(where,item);
+        Task.updatePositions(item.getTaskType());
+
+    }
+
+    public static void moveUncheckedTask(TaskItem item){
+        if(item.getListPosition()==0)
+            return;
+        List<TaskItem> list = Task.getList(item.getTaskType().getValue());
+        int where = item.getListPosition()-1;
+        list.remove(item);
+        while(list.get(where).getTaskComplete()){
+            where--;
+            if(where<=0)
+                break;
+        }
+        list.add(where+1,item);
+        Task.updatePositions(item.getTaskType());
+    }
+
 
     public static void addItemFromDatabase(TaskItem item) {
         if(Task.getList(item.getTaskTypeValue())!=null) {

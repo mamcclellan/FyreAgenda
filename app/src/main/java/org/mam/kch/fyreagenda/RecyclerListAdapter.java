@@ -156,13 +156,20 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                     @Override
                     public void onClick(View v) {
                         selectedItem = mValues.get(pos);
-                        if (holder.mCheckbox.isChecked()) selectedItem.completeTask();
-                        else selectedItem.restartTask();
+                        if (holder.mCheckbox.isChecked()){
+                            selectedItem.completeTask();
+                            Task.moveCheckedTask(selectedItem);
+                        }
+                        else {
+                            selectedItem.restartTask();
+                            Task.moveUncheckedTask(selectedItem);
+                        }
                         // need to set the item to be strike-through or greyed out or something...
                         /*selectedView = v.findViewById(R.id.content);
                         selectedView.setSelected(true);
                         selectedView.setBackgroundColor(Color.argb(150, 0, 0, 255));*/
                         Task.saveItem(selectedItem);
+                        ((TaskListActivity) mainActivity).refreshRecycleView();
                     }
                 }
         );
