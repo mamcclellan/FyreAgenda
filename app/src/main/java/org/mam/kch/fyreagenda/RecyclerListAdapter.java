@@ -3,6 +3,7 @@ package org.mam.kch.fyreagenda;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MotionEventCompat;
@@ -18,6 +19,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -64,10 +66,8 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         holder.mItem = mValues.get(position);
         holder.mCheckbox.setChecked(mValues.get(position).getTaskComplete());
         holder.mContentView.setText(mValues.get(position).getName());
-        // need to set strick-thorogh or greyed out background or something.
-        // this is not working...
         if(mValues.get(position).getTaskComplete())
-            holder.mContentView.setBackgroundColor(111111);
+            holder.mContentView.setPaintFlags(holder.mContentView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
         // Start a drag whenever the handle view it touched
         holder.handleView.setOnTouchListener(new View.OnTouchListener() {
@@ -152,12 +152,12 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                 }
         );
 
-        holder.mCheckbox.setOnClickListener(
-                new View.OnClickListener() {
+        holder.mCheckbox.setOnCheckedChangeListener(
+                new CompoundButton.OnCheckedChangeListener() {
                     @Override
-                    public void onClick(View v) {
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         selectedItem = mValues.get(pos);
-                        if (holder.mCheckbox.isChecked()){
+                        if (isChecked) {
                             selectedItem.completeTask();
                             Task.moveCheckedTask(selectedItem);
                         }
@@ -165,7 +165,6 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                             selectedItem.restartTask();
                             Task.moveUncheckedTask(selectedItem);
                         }
-                        // need to set the item to be strike-through or greyed out or something...
 
                         Task.saveItem(selectedItem);
                         ((TaskListActivity) mainActivity).refreshRecycleView();
