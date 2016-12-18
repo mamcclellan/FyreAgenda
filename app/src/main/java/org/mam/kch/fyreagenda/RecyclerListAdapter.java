@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -102,8 +103,8 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                 } else {
                     selectedItem = mValues.get(pos);
                     if (selectedItems.contains(selectedItem)) {
-                        v.setBackgroundColor(Color.TRANSPARENT);
-                        selectedViews.remove(v);
+                        holder.mCardView.setBackgroundColor(Color.WHITE);
+                        selectedViews.remove(holder.mCardView);
                         selectedItems.remove(selectedItem);
                         List<Task.TaskItem> removeList = new ArrayList<Task.TaskItem>();
                         for (Task.TaskItem task: clonedItems) {
@@ -118,10 +119,10 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                             }
                         }
                     } else {
-                        v.setBackgroundColor(Color.argb(150, 0, 0, 255));
+                        holder.mCardView.setBackgroundColor(Color.argb(150, 0, 0, 255));
                         selectedItems.add(selectedItem);
                         clonedItems.add(Task.cloneTask(selectedItem));
-                        selectedViews.add(v);
+                        selectedViews.add(holder.mCardView);
                     }
                 }
             }
@@ -142,10 +143,10 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                         selectedItem = mValues.get(pos);
                         selectedItems.add(mValues.get(pos));
                         clonedItems.add(Task.cloneTask(selectedItem));
-                        selectedView = v;
-                        selectedViews.add(v);
-                        v.setSelected(true);
-                        v.setBackgroundColor(Color.argb(150, 0, 0, 255));
+                        selectedView = holder.mCardView;
+                        selectedViews.add(holder.mCardView);
+                        holder.mCardView.setSelected(true);
+                        holder.mCardView.setBackgroundColor(Color.argb(150, 0, 0, 255));
                         return true;
                     }
                 }
@@ -165,15 +166,19 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                             Task.moveUncheckedTask(selectedItem);
                         }
                         // need to set the item to be strike-through or greyed out or something...
-                        /*selectedView = v.findViewById(R.id.content);
-                        selectedView.setSelected(true);
-                        selectedView.setBackgroundColor(Color.argb(150, 0, 0, 255));*/
+
                         Task.saveItem(selectedItem);
                         ((TaskListActivity) mainActivity).refreshRecycleView();
                     }
                 }
         );
 
+    }
+
+    public void finishActionMode() {
+        if (mActionMode != null) {
+            mActionMode.finish();
+        }
     }
 
     @Override
@@ -201,6 +206,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
     public class ItemViewHolder extends RecyclerView.ViewHolder implements
             ItemTouchHelperViewHolder {
         public final View mView;
+        public final CardView mCardView;
         public final TextView mContentView;
         public final CheckBox mCheckbox;
         public Task.TaskItem mItem;
@@ -209,6 +215,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         public ItemViewHolder(View view) {
             super(view);
             mView = view;
+            mCardView = (CardView) view.findViewById(R.id.card_view);
             handleView = (ImageView) view.findViewById(R.id.handle);
             mContentView = (TextView) view.findViewById(R.id.content);
             mCheckbox = (CheckBox) view.findViewById(R.id.checkbox);
@@ -326,7 +333,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         public void onDestroyActionMode(ActionMode mode) {
             inActionMode = false;
             for (View view: selectedViews) {
-                view.setBackgroundColor(Color.TRANSPARENT);
+                view.setBackgroundColor(Color.WHITE);
             }
             mActionMode = null;
         }

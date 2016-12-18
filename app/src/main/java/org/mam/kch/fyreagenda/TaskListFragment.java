@@ -83,6 +83,11 @@ public class TaskListFragment extends Fragment  implements OnStartDragListener {
         mItemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisiibleToUser) {
+        if (!isVisiibleToUser) adapter.finishActionMode();
+        super.setUserVisibleHint(isVisiibleToUser);
+    }
 
     @Override
     public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
