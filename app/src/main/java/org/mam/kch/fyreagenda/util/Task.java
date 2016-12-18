@@ -117,7 +117,7 @@ public class Task {
         if(listToPutItem != null) {
             item.setTaskType(taskType);
             item.setListPosition(listToPutItem.size());
-            listToPutItem.add(item);
+            listToPutItem.add(0, item);
             Task.updatePositions(taskType);
         }
     }
@@ -198,7 +198,7 @@ public class Task {
         list.remove(item);
         while(list.get(where).getTaskComplete()){
             where--;
-            if(where<=0)
+            if(where<0)
                 break;
         }
         list.add(where+1,item);

@@ -66,6 +66,10 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         holder.mItem = mValues.get(position);
         holder.mCheckbox.setChecked(mValues.get(position).getTaskComplete());
         holder.mContentView.setText(mValues.get(position).getName());
+        if(TaskListActivity.reorderMode==false)
+            holder.handleView.setVisibility(View.GONE);
+        else
+            holder.handleView.setVisibility(View.VISIBLE);
         if(mValues.get(position).getTaskComplete())
             holder.mContentView.setPaintFlags(holder.mContentView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 

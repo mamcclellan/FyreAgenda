@@ -46,6 +46,7 @@ public class TaskListActivity extends AppCompatActivity
     private static int currentTab;
     final Context context = this;
     private String result;
+    public static boolean reorderMode = false;
 
     @Override
     public void onSaveInstanceState(Bundle savedState) {
@@ -63,6 +64,8 @@ public class TaskListActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
+
+        reorderMode = false;
 
         // Get the ViewPager and set it's PagerAdapter so that it can display items
         viewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -220,6 +223,14 @@ public class TaskListActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
+        if (id == R.id.reorder) {
+            if(reorderMode == false)
+                reorderMode = true;
+            else
+                reorderMode = false;
+            viewPager.getAdapter().notifyDataSetChanged();
+            return true;
+        }
         if (id == R.id.action_settings) {
             return true;
         }
@@ -241,8 +252,12 @@ public class TaskListActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            // Handle the camera action
+
         } else if (id == R.id.nav_notifications) {
+
+        } else if (id == R.id.nav_archive) {
+
+        } else if (id == R.id.nav_deleted) {
 
         } else if (id == R.id.nav_settings) {
 
