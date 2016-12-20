@@ -1,8 +1,11 @@
 package org.mam.kch.fyreagenda;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import java.util.Calendar;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -24,6 +27,7 @@ import android.content.DialogInterface;
 import android.widget.EditText;
 
 
+import org.mam.kch.fyreagenda.util.DailyAlarmReceiver;
 import org.mam.kch.fyreagenda.util.Task;
 
 /**
@@ -37,22 +41,21 @@ import org.mam.kch.fyreagenda.util.Task;
 public class TaskListActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
     private static boolean mTwoPane;
     ViewPager viewPager;
     private static int currentTab;
     final Context context = this;
     private String result;
     public static boolean reorderMode = false;
+    // This value is defined and consumed by app code, so any value will work.
+    // There's no significance to this sample using 0.
+    public static final int REQUEST_CODE = 0;
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent;
 
     @Override
     public void onSaveInstanceState(Bundle savedState) {
         super.onSaveInstanceState(savedState);
-
-
     }
 
     @Override
@@ -98,6 +101,22 @@ public class TaskListActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
+        // Sets an alarm to check if today is the first day of the week.
+        Intent intent = new Intent(context, DailyAlarmReceiver.class);
+        intent.setAction(Intent.ACTION_MAIN);
+        alarmIntent = PendingIntent.getActivity(context, REQUEST_CODE, intent, 0);
+
+        alarmMgr = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
+        // Set the alarm to start at approximately 2:00 p.m.
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 3);
+
+        alarmMgr.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY, alarmIntent);
+
     }
 
     public void fabClicked(final View view){
@@ -230,6 +249,11 @@ public class TaskListActivity extends AppCompatActivity
                 reorderMode = false;
             viewPager.getAdapter().notifyDataSetChanged();
             return true;
+        }
+        if(id == R.id.end_week){
+            DailyAlarmReceiver dailyAlarmReceiver = new DailyAlarmReceiver();
+            dailyAlarmReceiver.endWeek();
+            viewPager.getAdapter().notifyDataSetChanged();
         }
         if (id == R.id.action_settings) {
             return true;

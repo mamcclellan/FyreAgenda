@@ -144,6 +144,22 @@ public class Task {
         }
         moveItemToNewList(item, taskType);
     }
+    public static void moveItemToNewListAtBottom(TaskItem item, TaskType taskType){
+        if(item.getTaskType() == taskType)
+            return;
+        ArrayList<TaskItem> listToPutItem = Task.getList(taskType.getValue());
+        ArrayList<TaskItem> listItemIsFrom = Task.getList(item.getTaskTypeValue());
+        if(listItemIsFrom!=null) {
+            listItemIsFrom.remove(item);
+            Task.updatePositions(item.getTaskType());
+        }
+        if(listToPutItem != null) {
+            item.setTaskType(taskType);
+            item.setListPosition(listToPutItem.size());
+            listToPutItem.add(item);
+            Task.updatePositions(taskType);
+        }
+    }
     public static void archiveItem(TaskItem item) {
         if(Task.getList(item.getTaskTypeValue())!=null) {
             ArrayList<Task.TaskItem> list = Task.getList(item.getTaskType().getValue());
