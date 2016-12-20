@@ -1,12 +1,8 @@
 package org.mam.kch.fyreagenda;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import java.util.Calendar;
-
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -29,7 +25,6 @@ import android.content.DialogInterface;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.google.android.gms.auth.api.Auth;
@@ -138,7 +133,7 @@ public class TaskListActivity extends AppCompatActivity
         // Sets an alarm to check if today is the first day of the week.
         alarm = new DailyAlarmReceiver();
         alarm.setAlarm(context);
-        
+
     }
 
     public void fabClicked(final View view) {

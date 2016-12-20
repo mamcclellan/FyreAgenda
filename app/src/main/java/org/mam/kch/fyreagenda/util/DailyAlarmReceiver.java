@@ -5,30 +5,25 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.app.Activity;
+import android.widget.Toast;
 import java.util.Calendar;
 
-/**
- * Created by Kristofer on 12/19/2016.
- */
-
-public class DailyAlarmReceiver extends BroadcastReceiver{
+public class DailyAlarmReceiver extends BroadcastReceiver {
     // Sunday = 1, Monday = 2, etc.
-    private int firstDayOfWeek = 2;
-    private AlarmManager alarmMgr;
-    private PendingIntent alarmIntent;
+    private int firstDayOfWeek = 4;
     // This value is defined and consumed by app code, so any value will work.
     // There's no significance to this sample using 0.
     public static final int REQUEST_CODE = 0;
 
-
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+        int today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        Toast.makeText(context, "Alarm is working", Toast.LENGTH_LONG).show();
+
+        /*if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
             this.setAlarm(context);
-        }
-        else if((int)Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == firstDayOfWeek){
+        }*/
+        if(today == firstDayOfWeek){
             Task.loadTasks(context);
             endWeek();
         }
@@ -69,9 +64,9 @@ public class DailyAlarmReceiver extends BroadcastReceiver{
     {
         Intent intent = new Intent(context, DailyAlarmReceiver.class);
         intent.setAction(Intent.ACTION_MAIN);
-        alarmIntent = PendingIntent.getBroadcast(context, REQUEST_CODE, intent, 0);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, REQUEST_CODE, intent, 0);
 
-        alarmMgr = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
         // Set the alarm to start at approximately 2:00 p.m.
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
@@ -79,6 +74,14 @@ public class DailyAlarmReceiver extends BroadcastReceiver{
 
         alarmMgr.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
                 AlarmManager.INTERVAL_DAY, alarmIntent);
+    }
+
+    public void setOnetimeTimer(Context context){
+        AlarmManager am=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, DailyAlarmReceiver.class);
+        intent.putExtra("onetime", Boolean.TRUE);
+        PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
+        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000, pi);
     }
 
     public void cancelAlarm(Context context)

@@ -29,8 +29,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.mam.kch.fyreagenda.TaskListActivity" />
         </activity>
-        <receiver   android:name=".util.DailyAlarmReceiver"
-            android:enabled="false">
+        <receiver   android:name=".util.DailyAlarmReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"></action>
             </intent-filter>
