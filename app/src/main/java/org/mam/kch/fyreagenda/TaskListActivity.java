@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import java.util.Calendar;
+
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -25,7 +27,18 @@ import android.view.View;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
+
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.mam.kch.fyreagenda.util.DailyAlarmReceiver;
 import org.mam.kch.fyreagenda.util.Task;
@@ -39,7 +52,8 @@ import org.mam.kch.fyreagenda.util.Task;
  * item details side-by-side using two vertical panes.
  */
 public class TaskListActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        GoogleApiClient.OnConnectionFailedListener {
 
     private static boolean mTwoPane;
     ViewPager viewPager;
@@ -52,6 +66,8 @@ public class TaskListActivity extends AppCompatActivity
     public static final int REQUEST_CODE = 0;
     private AlarmManager alarmMgr;
     private PendingIntent alarmIntent;
+    private GoogleApiClient mGoogleApiClient;
+    private static final int RC_SIGN_IN = 9001;
 
     @Override
     public void onSaveInstanceState(Bundle savedState) {
@@ -77,6 +93,16 @@ public class TaskListActivity extends AppCompatActivity
         viewPager.setAdapter(pagerAdapter);
         viewPager.setCurrentItem(currentTab);
 
+        // Set up Google connectivity
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,6 +127,17 @@ public class TaskListActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        View headerLayout = navigationView.getHeaderView(0);
+        SignInButton signInButton = (SignInButton) headerLayout.findViewById(R.id.sign_in_button);
+        signInButton.setSize(SignInButton.SIZE_WIDE);
+        signInButton.setOnClickListener(
+                new SignInButton.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        signIn();
+                    }
+                }
+        );
 
 
         // Sets an alarm to check if today is the first day of the week.
@@ -269,6 +306,21 @@ public class TaskListActivity extends AppCompatActivity
         super.onPause();
     }
 
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        // Do something eventually
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
+    }
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -300,6 +352,32 @@ public class TaskListActivity extends AppCompatActivity
     public void refreshRecycleView() {
         viewPager.getAdapter().notifyDataSetChanged();
     }
+
+    private void signIn() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void handleSignInResult(GoogleSignInResult result) {
+        if (result.isSuccess()) {
+            GoogleSignInAccount acct = result.getSignInAccount();
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            View headerLayout = navigationView.getHeaderView(0);
+            SignInButton signInButton = (SignInButton) headerLayout.findViewById(R.id.sign_in_button);
+            signInButton.setVisibility(View.GONE);
+            LinearLayout layout_signed_in = (LinearLayout) headerLayout.findViewById(R.id.signed_in);
+            TextView username = (TextView) headerLayout.findViewById(R.id.username);
+            username.setText(acct.getDisplayName());
+            TextView email = (TextView) headerLayout.findViewById(R.id.user_email);
+            email.setText(acct.getEmail());
+            layout_signed_in.setVisibility(View.VISIBLE);
+
+        }
+        else {
+
+        }
+    }
+
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
