@@ -61,11 +61,7 @@ public class TaskListActivity extends AppCompatActivity
     final Context context = this;
     private String result;
     public static boolean reorderMode = false;
-    // This value is defined and consumed by app code, so any value will work.
-    // There's no significance to this sample using 0.
-    public static final int REQUEST_CODE = 0;
-    private AlarmManager alarmMgr;
-    private PendingIntent alarmIntent;
+    private DailyAlarmReceiver alarm;
     private GoogleApiClient mGoogleApiClient;
     private static final int RC_SIGN_IN = 9001;
 
@@ -139,24 +135,13 @@ public class TaskListActivity extends AppCompatActivity
                 }
         );
 
-
         // Sets an alarm to check if today is the first day of the week.
-        Intent intent = new Intent(context, DailyAlarmReceiver.class);
-        intent.setAction(Intent.ACTION_MAIN);
-        alarmIntent = PendingIntent.getActivity(context, REQUEST_CODE, intent, 0);
-
-        alarmMgr = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
-        // Set the alarm to start at approximately 2:00 p.m.
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 3);
-
-        alarmMgr.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY, alarmIntent);
-
+        alarm = new DailyAlarmReceiver();
+        alarm.setAlarm(context);
+        
     }
 
-    public void fabClicked(final View view){
+    public void fabClicked(final View view) {
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(context);
         View promptsView = li.inflate(R.layout.new_task_prompt, null);
