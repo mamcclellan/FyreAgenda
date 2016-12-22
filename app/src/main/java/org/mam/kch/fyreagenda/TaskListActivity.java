@@ -23,6 +23,7 @@ import android.view.View;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -258,15 +259,6 @@ public class TaskListActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.reorder) {
-            if(reorderMode == false)
-                reorderMode = true;
-            else
-                reorderMode = false;
-            viewPager.getAdapter().notifyDataSetChanged();
-            return true;
-        }
         if(id == R.id.end_week){
             DailyAlarmReceiver dailyAlarmReceiver = new DailyAlarmReceiver();
             dailyAlarmReceiver.endWeek();
@@ -350,6 +342,8 @@ public class TaskListActivity extends AppCompatActivity
             username.setText(acct.getDisplayName());
             TextView email = (TextView) headerLayout.findViewById(R.id.user_email);
             email.setText(acct.getEmail());
+            ImageView profile_icon = (ImageView) headerLayout.findViewById(R.id.profile_icon);
+            profile_icon.setImageURI(acct.getPhotoUrl());
             layout_signed_in.setVisibility(View.VISIBLE);
 
         }

@@ -66,23 +66,8 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         holder.mItem = mValues.get(position);
         holder.mCheckbox.setChecked(mValues.get(position).getTaskComplete());
         holder.mContentView.setText(mValues.get(position).getName());
-        if(TaskListActivity.reorderMode==false)
-            holder.handleView.setVisibility(View.GONE);
-        else
-            holder.handleView.setVisibility(View.VISIBLE);
         if(mValues.get(position).getTaskComplete())
             holder.mContentView.setPaintFlags(holder.mContentView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-
-        // Start a drag whenever the handle view it touched
-        holder.handleView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
-                    mDragStartListener.onStartDrag(holder);
-                }
-                return false;
-            }
-        });
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,6 +125,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
                         if (mActionMode != null) {
                             return false;
                         }
+                        mDragStartListener.onStartDrag(holder);
                         inActionMode = true;
                         clonedItems.clear();
                         selectedItems.clear();
@@ -192,13 +178,11 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
-        if (!inActionMode) {
-            Collections.swap(mValues, fromPosition, toPosition);
-            Task.updatePositions(mValues.get(0).getTaskType());
-            notifyItemMoved(fromPosition, toPosition);
-            return true;
-        }
-        else return false;
+        Collections.swap(mValues, fromPosition, toPosition);
+        Task.updatePositions(mValues.get(0).getTaskType());
+        notifyItemMoved(fromPosition, toPosition);
+        finishActionMode();
+        return true;
     }
 
     @Override
@@ -213,13 +197,11 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         public final TextView mContentView;
         public final CheckBox mCheckbox;
         public Task.TaskItem mItem;
-        public final ImageView handleView;
 
         public ItemViewHolder(View view) {
             super(view);
             mView = view;
             mCardView = (CardView) view.findViewById(R.id.card_view);
-            handleView = (ImageView) view.findViewById(R.id.handle);
             mContentView = (TextView) view.findViewById(R.id.content);
             mCheckbox = (CheckBox) view.findViewById(R.id.checkbox);
         }
@@ -230,14 +212,14 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         }
         @Override
         public void onItemSelected() {
-            itemView.setBackgroundColor(Color.LTGRAY);
+            mCardView.setBackgroundColor(Color.WHITE);
         }
 
         @Override
         public void onItemClear() {
             if (inActionMode && selectedItems.contains(mItem))
-                itemView.setBackgroundColor(Color.argb(150, 0, 0, 255));
-            else itemView.setBackgroundColor(0);
+                mCardView.setBackgroundColor(Color.argb(150, 0, 0, 255));
+            else mCardView.setBackgroundColor(Color.WHITE);
             notifyDataSetChanged();
         }
     }
