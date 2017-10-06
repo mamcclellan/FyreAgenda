@@ -178,6 +178,9 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
+        if(mValues.get(fromPosition).getTaskComplete() != mValues.get(toPosition).getTaskComplete()){
+            return false;
+        }
         Collections.swap(mValues, fromPosition, toPosition);
         Task.updatePositions(mValues.get(0).getTaskType());
 
