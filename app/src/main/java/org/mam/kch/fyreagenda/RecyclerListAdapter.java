@@ -35,7 +35,7 @@ import java.util.List;
 public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapter.ItemViewHolder>
         implements ItemTouchHelperAdapter {
 
-    private final List<Task.TaskItem> mValues;
+    private List<Task.TaskItem> mValues;
     View selectedView;
     private Task.TaskItem selectedItem;
     private List<Task.TaskItem> selectedItems = new ArrayList<>();
@@ -180,7 +180,12 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
     public boolean onItemMove(int fromPosition, int toPosition) {
         Collections.swap(mValues, fromPosition, toPosition);
         Task.updatePositions(mValues.get(0).getTaskType());
+
+        // The ordering of this matters. Probably.
+        notifyItemChanged(fromPosition);
+        notifyItemChanged(toPosition);
         notifyItemMoved(fromPosition, toPosition);
+
         finishActionMode();
         return true;
     }
@@ -220,7 +225,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
             if (inActionMode && selectedItems.contains(mItem))
                 mCardView.setBackgroundColor(Color.argb(150, 0, 0, 255));
             else mCardView.setBackgroundColor(Color.WHITE);
-            notifyDataSetChanged();
+
         }
     }
 

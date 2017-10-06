@@ -86,13 +86,13 @@ public class TaskListActivity extends AppCompatActivity
         viewPager.setCurrentItem(currentTab);
 
         // Set up Google connectivity
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
+//        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                .requestEmail()
+//                .build();
+//        mGoogleApiClient = new GoogleApiClient.Builder(this)
+//                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+//                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+//                .build();
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -132,8 +132,8 @@ public class TaskListActivity extends AppCompatActivity
         );
 
         // Sets an alarm to check if today is the first day of the week.
-        alarm = new DailyAlarmReceiver();
-        alarm.setAlarm(context);
+//        alarm = new DailyAlarmReceiver();
+//        alarm.setAlarm(context);
 
     }
 
